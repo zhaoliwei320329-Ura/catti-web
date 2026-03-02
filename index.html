@@ -240,6 +240,8 @@ body::after{content:'';position:fixed;top:-30%;left:-20%;width:60%;height:60%;
 .qo:hover:not([disabled]){border-color:var(--cyan);background:rgba(0,229,255,.04);}
 .qo.ok{border-color:var(--green)!important;background:rgba(52,211,153,.1);color:var(--green);}
 .qo.ng{border-color:var(--red)!important;background:rgba(251,113,133,.1);color:var(--red);}
+
+.qo.sel{border-color:var(--yellow)!important;background:rgba(245,158,11,.08);}
 .qexp{margin-top:12px;background:#070e1c;border-radius:9px;padding:14px;border:1px solid var(--b1);}
 .qexp-title{font-size:10px;font-family:var(--mono);color:var(--yellow);margin-bottom:8px;letter-spacing:1px;}
 .qexp-sect{margin-bottom:10px;}
@@ -651,6 +653,15 @@ let ColFilter='all',TechFilter='all',PNFilter='all';
 let PNMode='cn2en'; // cn2en | en2cn
 let PNTestIdx=0,PNTestAns=null;
 
+// Bank session (按科目/题型组卷；提交后统一评分)
+let BSub='综合能力',BType='all',BNum=10,BSession=null;
+// Flashcards
+let FTag='all',FCat='all',FMode='en2cn',FIdx=0,FReveal=false;
+// Hotwords
+let HotFilter='all',HotCache=null;
+// Data/Cloud
+let CloudOn=false;
+
 function allU(){try{return JSON.parse(localStorage.getItem(AK+'_u')||'{}')}catch{return{}}}
 function saveU(u){localStorage.setItem(AK+'_u',JSON.stringify(u))}
 function getUD(){const u=allU();return u[CU]?.data||{r2:[],e2:[],r3:[],e3:[],vm:{},qstat:{correct:0,total:0},pnstat:{}}}
@@ -750,8 +761,11 @@ function switchLv(lv){
 
 const TABS=[
   {id:'today',lb:'今日录入'},
-  {id:'errors',lb:'错题笔记'},
   {id:'bank',lb:'练习题库'},
+  {id:'errors',lb:'错题本'},
+  {id:'flash',lb:'🃏 闪卡背词',cls:'kb'},
+  {id:'plan',lb:'🗓️ 备考计划'},
+  {id:'hot',lb:'🔥 热词更新'},
   {id:'vocab',lb:'📚 词汇库',cls:'kb'},
   {id:'coll',lb:'🔗 固定搭配',cls:'kb'},
   {id:'tech',lb:'⚙️ 翻译技巧',cls:'kb'},
@@ -759,6 +773,7 @@ const TABS=[
   {id:'stats',lb:'成绩分析'},
   {id:'curve',lb:'进步曲线'},
   {id:'review',lb:'每日复盘'},
+  {id:'data',lb:'☁️ 数据/同步'},
   {id:'guide',lb:'备考指南'},
 ];
 
@@ -834,7 +849,14 @@ function render(){
   const PR=pr(ovr);const last=recs[recs.length-1];
   const vm=getVMast();const qs=getQStat();
   let html='';
-  html+=`<div class="dlbar"><span style="font-size:11px;color:var(--muted2)">💾 数据存在本设备 · 换设备前请导出备份</span><button class="dlbtn" onclick="exportData()">导出备份</button></div>`;
+  html+=`<div class="dlbar">
+    <span style="font-size:11px;color:var(--muted2)">💾 数据默认仅在本设备 · 换设备请先导出/导入（可选：启用云同步）</span>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="dlbtn" onclick="openImport()">导入</button>
+      <button class="dlbtn" onclick="exportData()">导出</button>
+      <button class="dlbtn" onclick="cloudSyncNow()">云同步</button>
+    </div>
+  </div>`;
 
   /* ─── TODAY ─── */
   if(CTAB==='today'){
@@ -922,52 +944,325 @@ function render(){
 
   /* ─── BANK ─── */
   else if(CTAB==='bank'){
-    const qs2=QB[CLV]||[];
-    html+=`<div class="mode-sw">
-      <button class="ms-btn${QMode==='learn'?' on':''}" onclick="setQMode('learn')">📖 学习模式</button>
-      <button class="ms-btn${QMode==='test'?' on':''}" onclick="setQMode('test')">🎯 测试模式</button>
-    </div>`;
-    const qstat=getQStat();
-    html+=`<div style="display:flex;gap:8px;margin-bottom:11px">
-      <div class="sc" style="flex:1"><div class="sn" style="color:var(--yellow)">${qstat.total||0}</div><div class="sl">已完成</div></div>
-      <div class="sc" style="flex:1"><div class="sn" style="color:var(--green)">${qstat.correct||0}</div><div class="sl">答对</div></div>
-      <div class="sc" style="flex:1"><div class="sn" style="color:${qstat.total>0&&qstat.correct/qstat.total>=.7?'var(--green)':'var(--red)'}">${qstat.total>0?Math.round(qstat.correct/qstat.total*100):0}%</div><div class="sl">正确率</div></div>
-    </div>`;
-    if(!qs2.length){html+=`<div class="card" style="text-align:center;padding:40px;color:var(--muted)">题库建设中...</div>`}
-    else{
-      const q=qs2[QI%qs2.length];
-      const CATLABELS={vocab:'词汇辨析',grammar:'语法结构',hanyi:'汉译英',yihan:'英译汉',term:'专业术语',grammar2:'语法'};
-      html+=`<div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <span class="etag">${q.t==='vocab'?'📖 词汇辨析':q.t==='hanyi'?'✍️ 汉译英':q.t==='yihan'?'🔍 英译汉':q.t==='term'?'🏛️ 专业术语':'⚙️ 语法'}</span>
-          <span class="mu">第 ${QI%qs2.length+1} / ${qs2.length} 题</span>
-        </div>
-        <div class="qcard">
-          <div class="qtxt">${esc(q.q)}</div>
-          <div class="qopts">${q.o.map((opt,i)=>`<button class="qo" id="qo${i}" onclick="ansQ(${i},${q.a},${qs2.indexOf(q)})">${esc(opt)}</button>`).join('')}</div>
-          <div class="qexp" id="qex">
-            <div class="qexp-title">▸ 完整解析</div>
-            ${q.analysis?`
-            <div class="qexp-sect"><div class="qexp-sh">句型分析</div><div class="qexp-txt">${esc(q.analysis.struct)}</div></div>
-            <div class="qexp-sect"><div class="qexp-sh">翻译方法</div><div class="qexp-txt">${esc(q.analysis.technique)}</div></div>
-            <div class="qexp-sect"><div class="qexp-sh">关键词汇</div><div class="qexp-txt">${q.analysis.vocab.map(v=>`<span style="color:var(--cyan);">${esc(v.w)}</span> → ${esc(v.t)}`).join('<br>')}</div></div>
-            <div class="qexp-sect">
-              <div class="best-ans"><div style="font-size:10px;color:var(--green);font-family:var(--mono);margin-bottom:4px">★ 最佳译文/答案</div><div style="font-size:13px;line-height:1.8">${esc(q.analysis.best)}</div></div>
-              ${q.analysis.alts&&q.analysis.alts[0]?`<div class="alt-ans"><div style="font-size:10px;color:var(--indigo);font-family:var(--mono);margin-bottom:4px">◎ 备选译文</div><div style="font-size:13px;line-height:1.8">${esc(q.analysis.alts[0])}</div></div>`:''}
+    // 题库：按科目/题型组卷；全部做完后一次性提交评分
+    const raw=QB[CLV]||[];
+    const qs=raw.map((q,idx)=>({
+      ...q,
+      _id:q.id||idx,
+      subj:q.subj || ((q.t==='hanyi'||q.t==='yihan')?'实务':'综合能力'),
+      qtype:q.qtype || q.t
+    }));
+    const subjs=[...new Set(qs.map(x=>x.subj))];
+    const types=['all',...new Set(qs.map(x=>x.qtype))];
+
+    if(!qs.length){
+      html+=`<div class="card" style="text-align:center;padding:40px;color:var(--muted)">题库建设中...</div>`;
+    }else{
+      // 配置面板（未开始）
+      if(!BSession){
+        html+=`<div class="card">
+          <div class="ct">▸ 练习题库（两科目×题型）</div>
+          <div class="g2" style="margin-bottom:12px">
+            <div>
+              <label class="lb">科目</label>
+              <select class="ai" onchange="BSub=this.value;render()">
+                ${subjs.map(s=>`<option value="${esc(s)}" ${BSub===s?'selected':''}>${esc(s)}</option>`).join('')}
+              </select>
             </div>
-            <div class="qexp-sect"><div class="qexp-sh">考点说明</div><div class="qexp-txt">${esc(q.analysis.note)}</div></div>
-            `:`<div class="qexp-txt">${esc(q.analysis?.note||'')}</div>`}
+            <div>
+              <label class="lb">题型</label>
+              <select class="ai" onchange="BType=this.value;render()">
+                ${types.map(t=>`<option value="${esc(t)}" ${BType===t?'selected':''}>${t==='all'?'全部':esc(t)}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="lb">题量</label>
+              <input class="ai" type="number" min="1" max="200" value="${BNum}" oninput="BNum=Math.max(1,Math.min(200,parseInt(this.value||'10')));"/>
+            </div>
+            <div>
+              <label class="lb">规则</label>
+              <div class="mu" style="line-height:1.9">
+                • 全部做完后点击「提交」才会出现评分/正确率（不逐题反馈）<br>
+                • 错题将自动加入错题本，并把相关词汇/搭配加入备考计划
+              </div>
+            </div>
           </div>
+          <button class="btn bc" onclick="bankStart()">开始组卷 →</button>
+        </div>`;
+        // 最近一次成绩
+        const qstat=getQStat();
+        html+=`<div style="display:flex;gap:8px;margin-top:10px">
+          <div class="sc" style="flex:1"><div class="sn" style="color:var(--yellow)">${qstat.total||0}</div><div class="sl">累计提交</div></div>
+          <div class="sc" style="flex:1"><div class="sn" style="color:var(--green)">${qstat.correct||0}</div><div class="sl">累计答对</div></div>
+          <div class="sc" style="flex:1"><div class="sn" style="color:${qstat.total>0&&qstat.correct/qstat.total>=.7?'var(--green)':'var(--red)'}">${qstat.total>0?Math.round(qstat.correct/qstat.total*100):0}%</div><div class="sl">累计正确率</div></div>
+        </div>`;
+      }
+      // 做题阶段
+      else if(BSession.stage==='doing'){
+        const sess=BSession;
+        const q=sess.list[sess.idx];
+        const doneCnt=Object.keys(sess.ans||{}).length;
+        html+=`<div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span class="etag">🧩 ${esc(sess.subj)} · ${sess.type==='all'?'全部题型':esc(sess.type)}</span>
+            <span class="mu">${sess.idx+1} / ${sess.list.length} · 已作答 ${doneCnt}</span>
+          </div>
+          <div class="qcard">
+            <div class="qtxt">${esc(q.q)}</div>
+            ${q.o?`<div class="qopts">
+              ${q.o.map((opt,i)=>`<button class="qo ${sess.ans[q._id]===i?'sel':''}" onclick="bankPick(${i})">${esc(opt)}</button>`).join('')}
+            </div>`:`<textarea class="ta" placeholder="在此作答..." oninput="bankTypeAnswer(this.value)">${esc(sess.ans[q._id]||'')}</textarea>`}
+            <div class="mu" style="margin-top:10px">提示：本模式不即时显示对错，提交后统一评分。</div>
+          </div>
+          <div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">
+            <button class="btn" onclick="bankPrev()" ${sess.idx<=0?'disabled':''}>← 上一题</button>
+            <button class="btn bc" onclick="bankNext()">${sess.idx>=sess.list.length-1?'下一题':'下一题 →'}</button>
+            <button class="btn br" onclick="bankSubmit()" ${doneCnt<sess.list.length?'disabled':''} style="margin-left:auto">提交并评分</button>
+          </div>
+          ${doneCnt<sess.list.length?`<div class="mu" style="margin-top:8px;color:var(--muted2)">需全部作答后才可提交（还差 ${sess.list.length-doneCnt} 题）</div>`:''}
+        </div>`;
+      }
+      // 结果阶段
+      else if(BSession.stage==='result'){
+        const sess=BSession;
+        const res=sess.result;
+        html+=`<div class="card">
+          <div class="ct">▸ 本次结果</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <div class="sc" style="flex:1"><div class="sn" style="color:var(--green)">${res.correct}</div><div class="sl">答对</div></div>
+            <div class="sc" style="flex:1"><div class="sn" style="color:var(--yellow)">${res.total}</div><div class="sl">总题数</div></div>
+            <div class="sc" style="flex:1"><div class="sn" style="color:${res.acc>=70?'var(--green)':'var(--red)'}">${res.acc}%</div><div class="sl">正确率</div></div>
+          </div>
+          <div class="mu" style="line-height:1.9">
+            已自动：① 错题加入错题本 ② 解析中的关键词加入备考计划（可在「备考计划」查看）<br>
+            你可以逐题复盘，也可以重新组卷。
+          </div>
+          <div style="display:flex;gap:7px;margin-top:12px">
+            <button class="btn bc" onclick="bankReset()">重新组卷</button>
+            <button class="btn" onclick="setTab('plan')">去看备考计划 →</button>
+            <button class="btn" onclick="setTab('errors')">去看错题本 →</button>
+          </div>
+        </div>`;
+
+        // 逐题复盘
+        html+=`<div class="card">
+          <div class="ct">▸ 逐题复盘</div>
+          ${sess.list.map((q,idx)=>{
+            const ua=sess.ans[q._id];
+            const ok = (typeof ua==='number') ? (ua===q.a) : null;
+            const uaTxt = (typeof ua==='number' && q.o)? q.o[ua] : (ua||'');
+            const caTxt = (q.o&&typeof q.a==='number')? q.o[q.a] : (q.analysis?.best||'');
+            return `<div class="qcard" style="margin-bottom:10px">
+              <div class="mu" style="margin-bottom:6px">第 ${idx+1} 题 · ${esc(q.subj)} · ${esc(q.qtype)}</div>
+              <div class="qtxt">${esc(q.q)}</div>
+              <div class="qexp" style="display:block">
+                <div class="qexp-sect">
+                  <div class="qexp-sh">你的答案</div>
+                  <div class="qexp-txt" style="color:${ok===true?'var(--green)':ok===false?'var(--red)':'var(--text)'}">${esc(uaTxt||'(未作答)')}</div>
+                </div>
+                <div class="qexp-sect">
+                  <div class="qexp-sh">参考答案</div>
+                  <div class="qexp-txt" style="color:var(--green)">${esc(caTxt)}</div>
+                </div>
+                ${q.analysis?`<div class="qexp-sect"><div class="qexp-sh">考点/解析</div><div class="qexp-txt">${esc(q.analysis.note||q.analysis.technique||'')}</div></div>`:''}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+      }
+    }
+  }
+
+
+  /* ─── FLASHCARDS ─── */
+  else if(CTAB==='flash'){
+    const allw=getAllWords();
+    const tags=['all',...new Set(allw.flatMap(w=>w.tags||[]))];
+    const cats=['all',...new Set(allw.map(w=>w.cat||'其他'))];
+    const deck=flashGetDeck();
+    const cur=deck.length?deck[FIdx%deck.length]:null;
+
+    html+=`<div class="card">
+      <div class="ct">▸ 闪卡背词（支持标签/分类/音标/发音）</div>
+      <div class="g2" style="margin-bottom:12px">
+        <div><label class="lb">标签</label>
+          <select class="ai" onchange="FTag=this.value;flashRebuild();render()">
+            ${tags.map(t=>`<option value="${esc(t)}" ${FTag===t?'selected':''}>${esc(t)}</option>`).join('')}
+          </select>
         </div>
-        <div style="display:flex;gap:7px;margin-top:11px">
-          <button class="btn bc" onclick="nextQ()" style="flex:1">下一题 →</button>
-          <button class="btn br" style="width:auto;padding:9px 13px" onclick="addQErr('${q.t}','${encodeURIComponent(q.q)}','${encodeURIComponent(q.analysis?.best||q.o[q.a]||'')}')">＋ 加入错题</button>
+        <div><label class="lb">分类</label>
+          <select class="ai" onchange="FCat=this.value;flashRebuild();render()">
+            ${cats.map(c=>`<option value="${esc(c)}" ${FCat===c?'selected':''}>${esc(c)}</option>`).join('')}
+          </select>
+        </div>
+        <div><label class="lb">方向</label>
+          <select class="ai" onchange="FMode=this.value;FReveal=false;render()">
+            <option value="en2cn" ${FMode==='en2cn'?'selected':''}>英 → 中</option>
+            <option value="cn2en" ${FMode==='cn2en'?'selected':''}>中 → 英</option>
+          </select>
+        </div>
+        <div><label class="lb">卡组</label>
+          <div class="mu" style="line-height:1.9">共 ${deck.length} 张 · 记住 ${Object.keys(getFKnown()).length} 张</div>
+        </div>
+      </div>
+      ${!cur?`<div class="mu" style="color:var(--muted2)">当前筛选下暂无词条。可到「词汇库」增加词条，或放宽筛选。</div>`:`
+      <div class="qcard" style="text-align:center">
+        <div class="mu" style="margin-bottom:6px">${esc(cur.cat||'')}</div>
+        <div style="font-size:22px;font-weight:800;line-height:1.3">
+          ${FMode==='en2cn'?esc(cur.en):esc(cur.cn)}
+        </div>
+        <div class="mu" id="ipa" style="margin-top:6px"></div>
+        <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn" onclick="flashSpeak('${encodeURIComponent(cur.en)}')">🔊 发音</button>
+          <button class="btn" onclick="flashLoadIPA('${encodeURIComponent(cur.en)}')">/ɪ/ 音标</button>
+          <button class="btn bc" onclick="FReveal=!FReveal;render()">${FReveal?'隐藏':'显示'}答案</button>
+        </div>
+        ${FReveal?`<div style="margin-top:12px;text-align:left">
+          <div class="qexp" style="display:block">
+            <div class="qexp-sect"><div class="qexp-sh">答案</div>
+              <div class="qexp-txt" style="font-size:14px;line-height:1.9">
+                ${FMode==='en2cn'?esc(cur.cn):esc(cur.en)}
+              </div>
+            </div>
+            ${cur.mem?`<div class="qexp-sect"><div class="qexp-sh">记忆</div><div class="qexp-txt">${esc(cur.mem)}</div></div>`:''}
+            ${cur.tags?.length?`<div class="qexp-sect"><div class="qexp-sh">标签</div><div class="qexp-txt">${cur.tags.map(t=>`<span class="tg ${TAG_STYLES[t]||''}">${esc(t)}</span>`).join(' ')}</div></div>`:''}
+          </div>
+        </div>`:''}
+      </div>
+      <div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">
+        <button class="btn" onclick="flashPrev()">← 上一张</button>
+        <button class="btn" onclick="flashNext()">下一张 →</button>
+        <button class="btn br" onclick="flashMark(false)">不会（加入计划）</button>
+        <button class="btn bc" onclick="flashMark(true)">记住</button>
+      </div>
+      `}
+    </div>`;
+  }
+
+  /* ─── PLAN ─── */
+  else if(CTAB==='plan'){
+    const plan=getPlan();
+    const due=plan.filter(p=>isDue(p.next));
+    const later=plan.filter(p=>!isDue(p.next));
+    html+=`<div class="card">
+      <div class="ct">▸ 备考计划（自动从错题/闪卡生成）</div>
+      <div class="mu" style="line-height:1.9">
+        • 错题提交后：解析里的关键词会自动加入计划<br>
+        • 闪卡点「不会」：自动加入计划<br>
+        • 点击“完成”会自动安排下次复习（1/3/7/14/30天）
+      </div>
+      <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn bc" onclick="planAuto()">从错题再生成一次</button>
+        <button class="btn" onclick="planClearDone()">清理已掌握</button>
+      </div>
+    </div>`;
+
+    const renderPlanItem=(p)=>`
+      <div class="rb">
+        <div class="rt">${esc(p.kind||'')} · 下次：${esc(p.next||'')}</div>
+        <div style="font-size:15px;line-height:1.8"><b>${esc(p.en||p.cn||p.key||'')}</b> ${p.cn&&p.en?`<span style="color:var(--muted2)">—</span> ${esc(p.cn)}`:''}</div>
+        ${p.note?`<div class="rr" style="margin-top:6px;color:var(--muted2)">${esc(p.note)}</div>`:''}
+        <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn bc" onclick="planDone(${p.id})">完成</button>
+          <button class="btn" onclick="planSnooze(${p.id},1)">+1天</button>
+          <button class="btn" onclick="planSnooze(${p.id},3)">+3天</button>
+          <button class="btn br" onclick="planRemove(${p.id})">移除</button>
+        </div>
+      </div>`;
+
+    html+=`<div class="card">
+      <div class="ct">▸ 今天要复习（${due.length}）</div>
+      ${due.length?due.map(renderPlanItem).join(''):`<div class="mu" style="color:var(--muted2)">暂无到期任务。去做题/背词会自动生成。</div>`}
+    </div>`;
+    html+=`<div class="card">
+      <div class="ct">▸ 之后（${later.length}）</div>
+      ${later.length?later.slice(0,30).map(renderPlanItem).join(''):`<div class="mu" style="color:var(--muted2)">暂无。</div>`}
+      ${later.length>30?`<div class="mu" style="color:var(--muted2)">仅显示前30条，更多请清理/筛选（后续可加筛选）。</div>`:''}
+    </div>`;
+  }
+
+  /* ─── HOTWORDS ─── */
+  else if(CTAB==='hot'){
+    const hw=getHotwords();
+    html+=`<div class="card">
+      <div class="ct">▸ 热词更新（自动/手动两种）</div>
+      <div class="mu" style="line-height:1.9">
+        • 网页本身是静态的，想“每天自动更新”最省钱方式：用 GitHub Actions 定时抓取并生成 hotwords.json（我下面会给你代码）。<br>
+        • 你也可以手动粘贴热词列表/JSON 导入。
+      </div>
+      <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn bc" onclick="hotUpdate()">从仓库更新</button>
+        <button class="btn" onclick="hotOpenImport()">手动导入</button>
+        <button class="btn br" onclick="hotClear()">清空</button>
+      </div>
+      <div class="mu" style="margin-top:10px;color:var(--muted2)">当前热词：${hw.length} 条</div>
+    </div>`;
+
+    html+=`<div class="card">
+      <div class="ct">▸ 热词列表</div>
+      ${hw.length?hw.slice(0,200).map(x=>`
+        <div class="rb">
+          <div class="rt">${esc(x.date||'')} · ${esc(x.src||'')}</div>
+          <div class="rr" style="font-size:14px"><b>${esc(x.en||'')}</b> — ${esc(x.cn||'')}</div>
+          ${x.note?`<div class="rr" style="color:var(--muted2);margin-top:6px">${esc(x.note)}</div>`:''}
+        </div>`).join(''):`<div class="mu" style="color:var(--muted2)">暂无。点“从仓库更新”或“手动导入”。</div>`}
+      ${hw.length>200?`<div class="mu" style="color:var(--muted2)">仅显示前200条。</div>`:''}
+    </div>`;
+
+    // 手动导入弹层（简化：在同页显示）
+    if(HOT_IMPORT_OPEN){
+      html+=`<div class="card">
+        <div class="ct">▸ 手动导入</div>
+        <div class="mu" style="color:var(--muted2);line-height:1.9">支持两种格式：<br>1) 每行：英文|||中文（可选|||备注）<br>2) JSON 数组：[{en,cn,date,src,note}]</div>
+        <textarea class="ta" id="hotTa" placeholder="示例：\nnew quality productive forces|||新质生产力|||2024|||GWR\n..."></textarea>
+        <div style="display:flex;gap:7px;margin-top:10px">
+          <button class="btn bc" onclick="hotDoImport()">导入</button>
+          <button class="btn" onclick="hotOpenImport(false)">取消</button>
         </div>
       </div>`;
     }
   }
 
-  /* ─── VOCAB ─── */
+  /* ─── DATA / CLOUD ─── */
+  else if(CTAB==='data'){
+    const p=getCloudCfg();
+    html+=`<div class="card">
+      <div class="ct">▸ 数据备份（换设备必用）</div>
+      <div class="mu" style="line-height:1.9">
+        • 当前模式：默认只存在本设备浏览器。<br>
+        • 换电脑/换手机：先导出 JSON，再在新设备导入即可。<br>
+        • 若想免费云端同步：可以用 Firebase（免费额度）/ Supabase（免费额度）。我已预留 Firebase 云同步入口（可选）。
+      </div>
+      <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn bc" onclick="exportData()">导出备份</button>
+        <button class="btn" onclick="openImport()">导入备份</button>
+        <button class="btn" onclick="cloudSyncNow()">云同步（可选）</button>
+      </div>
+    </div>`;
+
+    html+=`<div class="card">
+      <div class="ct">▸ 云同步（Firebase 免费方案，可选启用）</div>
+      <div class="mu" style="line-height:1.9;color:var(--muted2)">
+        说明：GitHub Pages 是静态站，想跨设备“自动同步”需要一个云数据库。Firebase 的 Spark 计划可免费使用（有额度限制）。<br>
+        你只要在 Firebase 控制台创建项目，把 config 粘贴进来，再设置一个云账号（邮箱+密码）即可。
+      </div>
+      <label class="lb">Firebase Config（JSON）</label>
+      <textarea class="ta" id="fbCfg" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}'>${esc(p?.cfg||'')}</textarea>
+      <div class="g2" style="margin-top:10px">
+        <div><label class="lb">云账号邮箱</label><input class="ai" id="fbEmail" value="${esc(p?.email||'')}" placeholder="you@example.com"/></div>
+        <div><label class="lb">云账号密码</label><input class="ai" id="fbPass" type="password" value="${esc(p?.pass||'')}" placeholder="至少6位"/></div>
+      </div>
+      <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn bc" onclick="cloudSaveCfg()">保存配置</button>
+        <button class="btn" onclick="cloudConnect()">连接并拉取</button>
+        <button class="btn" onclick="cloudPush()">推送到云端</button>
+        <button class="btn br" onclick="cloudDisable()">关闭云同步</button>
+      </div>
+      <div class="mu" style="margin-top:10px;color:var(--muted2)">当前：${p?.cfg?'已填写配置':'未启用'} · ${p?.email?esc(p.email):'未填账号'}</div>
+    </div>`;
+  }
+
+/* ─── VOCAB ─── */
   else if(CTAB==='vocab'){
     const vm=getVMast();
     const mastCount=Object.values(vm).filter(Boolean).length;
@@ -1312,6 +1607,433 @@ function addQErr(type,qe,ae){
   rNav();
 }
 function fl(id,t,c){const b=document.getElementById(id);if(!b)return;const o=b.textContent;b.textContent=t;b.style.color=c;setTimeout(()=>{b.textContent=o;b.style.color=''},2000)}
+
+/* ================================================================
+   EXTENSIONS: Bank Session / Flashcards / Plan / Hotwords / Import&Cloud
+   ================================================================ */
+
+// ---- Date helpers (YYYY-MM-DD)
+function ymd(d=new Date()){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const da=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${da}`;
+}
+function addDays(dateStr,days){
+  const d=new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()+days);
+  return ymd(d);
+}
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function isDue(dateStr){
+  if(!dateStr) return true;
+  return dateStr<=ymd();
+}
+
+// ---- Import/Export UI
+(function(){
+  if(!document.getElementById('imf')){
+    const inp=document.createElement('input');
+    inp.type='file'; inp.id='imf'; inp.accept='application/json'; inp.style.display='none';
+    inp.addEventListener('change',()=>{ if(inp.files&&inp.files[0]) importData(inp.files[0]); inp.value=''; });
+    document.body.appendChild(inp);
+  }
+})();
+function openImport(){ document.getElementById('imf')?.click(); }
+function importData(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const obj=JSON.parse(r.result);
+      const d=obj?.data;
+      if(!d||typeof d!=='object') throw new Error('格式不正确');
+      // 直接覆盖当前用户数据（最安全/最一致）
+      setUD(d);
+      sync('ok');
+      alert('导入成功：已覆盖当前账号数据。');
+      render();
+    }catch(e){
+      alert('导入失败：'+(e?.message||e));
+    }
+  };
+  r.readAsText(file,'utf-8');
+}
+
+// ---- Plan
+function getPlan(){ return getUD().plan||[]; }
+function savePlan(plan){ const d=getUD(); d.plan=plan; setUD(d); sync('ok'); }
+function planUpsert(item){
+  const plan=getPlan();
+  // same key+kind de-dup
+  const key=(item.kind||'')+'|'+(item.en||item.key||'')+'|'+(item.cn||'');
+  const i=plan.findIndex(p=>((p.kind||'')+'|'+(p.en||p.key||'')+'|'+(p.cn||''))===key);
+  if(i>=0){
+    // 若存在：把 next 提前（更紧迫）
+    plan[i].next = (plan[i].next && plan[i].next<item.next) ? plan[i].next : item.next;
+    plan[i].note = plan[i].note || item.note;
+    plan[i].src = plan[i].src || item.src;
+  }else{
+    plan.unshift(item);
+  }
+  savePlan(plan);
+}
+function planFromAnalysis(q){
+  const a=q?.analysis;
+  if(!a) return;
+  const src = q?.analysis?.src || '题库解析';
+  const date = ymd();
+  (a.vocab||[]).forEach(v=>{
+    planUpsert({id:Date.now()+Math.floor(Math.random()*9999), kind:'词汇', key:v.w, en:v.t, cn:v.w, note:`来自：${src}`, src, next:addDays(date,1), step:0});
+  });
+  // 若有最佳译文，也可以当句型复习
+  if(a.best && (q.t==='hanyi'||q.t==='yihan')){
+    planUpsert({id:Date.now()+Math.floor(Math.random()*9999), kind:'句型/译文', key:q.q.slice(0,24), en:a.best, cn:'', note:(a.note||'').slice(0,120), src, next:addDays(date,3), step:0});
+  }
+}
+const PLAN_STEPS=[1,3,7,14,30,60];
+function planDone(id){
+  const plan=getPlan();
+  const i=plan.findIndex(p=>p.id===id);
+  if(i<0) return;
+  const p=plan[i];
+  const step=Math.min((p.step||0)+1, PLAN_STEPS.length-1);
+  p.step=step;
+  p.next=addDays(ymd(), PLAN_STEPS[step]);
+  // 若已到高阶，标记掌握（可清理）
+  if(step>=4) p.mastered=true;
+  plan[i]=p;
+  savePlan(plan);
+  render();
+}
+function planSnooze(id,days){
+  const plan=getPlan();
+  const i=plan.findIndex(p=>p.id===id);
+  if(i<0) return;
+  plan[i].next=addDays(ymd(),days);
+  savePlan(plan); render();
+}
+function planRemove(id){
+  savePlan(getPlan().filter(p=>p.id!==id));
+  render();
+}
+function planClearDone(){
+  savePlan(getPlan().filter(p=>!p.mastered));
+  render();
+}
+function planAuto(){
+  // 从错题本抽取关键词（简单策略：把 note 里出现的“正确表达/关键”当提示）
+  const errs=getErr();
+  errs.slice(0,80).forEach(e=>{
+    if(e.cor){
+      planUpsert({id:Date.now()+Math.floor(Math.random()*9999), kind:'错题回顾', key:e.w, en:e.cor, cn:'', note:(e.note||'').slice(0,120), src:e.src||'错题本', next:addDays(ymd(),1), step:0});
+    }
+  });
+  alert('已从错题本补充生成计划（取前80条）。');
+  render();
+}
+
+// ---- Errors (auto add without UI)
+function addQErrAuto(q){
+  const type=q.t||q.qtype||'bank';
+  const qtxt=q.q||'';
+  const ans=(q.analysis?.best) || (q.o && typeof q.a==='number' ? q.o[q.a] : '');
+  const errs=getErr();
+  saveErr([{id:Date.now()+Math.floor(Math.random()*9999),dt:td(),c:type,w:`[题库] ${qtxt.slice(0,50)}`,cor:ans,src:'题库提交',note:autoNote(type,qtxt.slice(0,50),ans),done:false},...errs]);
+}
+
+// ---- Bank session logic
+function bankStart(){
+  const raw=QB[CLV]||[];
+  let qs=raw.map((q,idx)=>({ ...q,_id:q.id||idx, subj:q.subj || ((q.t==='hanyi'||q.t==='yihan')?'实务':'综合能力'), qtype:q.qtype || q.t }));
+  qs=qs.filter(q=>q.subj===BSub);
+  if(BType!=='all') qs=qs.filter(q=>q.qtype===BType);
+  qs=shuffle(qs);
+  if(BNum>0) qs=qs.slice(0,Math.min(BNum,qs.length));
+  BSession={stage:'doing',subj:BSub,type:BType,list:qs,ans:{},idx:0,startedAt:Date.now()};
+  render();
+}
+function bankPick(i){
+  const s=BSession; if(!s||s.stage!=='doing') return;
+  const q=s.list[s.idx];
+  s.ans[q._id]=i;
+  BSession=s;
+  render();
+}
+function bankTypeAnswer(v){
+  const s=BSession; if(!s||s.stage!=='doing') return;
+  const q=s.list[s.idx];
+  s.ans[q._id]=v;
+  BSession=s;
+}
+function bankPrev(){ if(!BSession||BSession.stage!=='doing') return; BSession.idx=Math.max(0,BSession.idx-1); render(); }
+function bankNext(){ if(!BSession||BSession.stage!=='doing') return; BSession.idx=Math.min(BSession.list.length-1,BSession.idx+1); render(); }
+function bankSubmit(){
+  const s=BSession; if(!s||s.stage!=='doing') return;
+  const total=s.list.length;
+  const keys=Object.keys(s.ans||{});
+  if(keys.length<total){ alert('请先完成全部题目再提交。'); return; }
+
+  let correct=0, wrongQs=[];
+  s.list.forEach(q=>{
+    const ua=s.ans[q._id];
+    if(typeof q.a==='number' && typeof ua==='number'){
+      if(ua===q.a) correct++;
+      else wrongQs.push(q);
+    }else{
+      // 非选择题暂不自动判分：一律算未判（不计对）
+      wrongQs.push(q);
+    }
+  });
+  const acc=Math.round(correct/total*100);
+
+  // 更新累计统计
+  const qstat=getQStat();
+  qstat.total=(qstat.total||0)+total;
+  qstat.correct=(qstat.correct||0)+correct;
+  qstat.byType=qstat.byType||{};
+  s.list.forEach(q=>{
+    const t=q.qtype||q.t||'other';
+    qstat.byType[t]=qstat.byType[t]||{t:0,c:0};
+    qstat.byType[t].t+=1;
+    const ua=s.ans[q._id];
+    if(typeof q.a==='number' && typeof ua==='number' && ua===q.a) qstat.byType[t].c+=1;
+  });
+  setQStat(qstat);
+
+  // 错题入错题本 + 生成计划
+  wrongQs.forEach(q=>{
+    addQErrAuto(q);
+    planFromAnalysis(q);
+  });
+
+  // 保存本次session日志（用于后续更丰富的统计）
+  const d=getUD(); d.sessions=d.sessions||[];
+  d.sessions.unshift({id:Date.now(),dt:ymd(),subj:s.subj,type:s.type,total,correct,acc});
+  setUD(d);
+
+  s.stage='result';
+  s.result={total,correct,acc,wrong:wrongQs.length};
+  BSession=s;
+  rNav();
+  render();
+}
+function bankReset(){ BSession=null; render(); }
+
+// ---- Flashcards
+function getAllWords(){
+  const d=getUD();
+  const my=d.myWords||[];
+  return [...VOCAB_DB, ...my];
+}
+function getFKnown(){ return getUD().fknown||{}; }
+function setFKnown(k){ const d=getUD(); d.fknown=k; setUD(d); sync('ok'); }
+const _FLASH={deck:[],sig:''};
+function flashRebuild(){ _FLASH.sig=''; FIdx=0; FReveal=false; }
+function flashGetDeck(){
+  const all=getAllWords();
+  const deck=all.filter(w=>{
+    const okTag=(FTag==='all') || (w.tags||[]).includes(FTag);
+    const okCat=(FCat==='all') || ((w.cat||'其他')===FCat);
+    return okTag && okCat;
+  });
+  const sig=FTag+'|'+FCat+'|'+deck.length;
+  if(_FLASH.sig!==sig){ _FLASH.deck=shuffle(deck.slice()); _FLASH.sig=sig; FIdx=0; FReveal=false; }
+  return _FLASH.deck;
+}
+function flashPrev(){ const d=flashGetDeck(); if(!d.length) return; FIdx=(FIdx-1+d.length)%d.length; FReveal=false; render(); }
+function flashNext(){ const d=flashGetDeck(); if(!d.length) return; FIdx=(FIdx+1)%d.length; FReveal=false; render(); }
+function flashMark(ok){
+  const d=flashGetDeck(); if(!d.length) return;
+  const cur=d[FIdx%d.length];
+  const known=getFKnown();
+  if(ok){
+    known[cur.id||cur.en]=1;
+    setFKnown(known);
+  }else{
+    // 不会：加入计划
+    planUpsert({id:Date.now()+Math.floor(Math.random()*9999),kind:'背词',key:cur.en,en:cur.en,cn:cur.cn,note:cur.mem||'',src:'闪卡',next:addDays(ymd(),1),step:0});
+  }
+  flashNext();
+}
+
+// ---- IPA & Audio (dictionaryapi.dev)
+async function dictLookup(word){
+  const d=getUD(); d.dictCache=d.dictCache||{};
+  if(d.dictCache[word]) return d.dictCache[word];
+  const url=`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`;
+  const res=await fetch(url);
+  if(!res.ok) throw new Error('查词失败');
+  const js=await res.json();
+  const phonetics=[];
+  let aud=null;
+  (js||[]).forEach(ent=>{
+    (ent.phonetics||[]).forEach(p=>{
+      if(p.text) phonetics.push(p.text);
+      if(!aud && p.audio) aud=p.audio;
+    });
+  });
+  const out={phonetics:[...new Set(phonetics)].slice(0,3), audio:aud||null};
+  d.dictCache[word]=out; setUD(d);
+  return out;
+}
+async function flashLoadIPA(w){
+  try{
+    const word=decodeURIComponent(w);
+    const out=await dictLookup(word);
+    const el=document.getElementById('ipa');
+    if(el) el.textContent=out.phonetics?.join('  ')||'（无音标数据）';
+  }catch(e){ alert('获取音标失败：'+(e?.message||e)); }
+}
+async function flashSpeak(w){
+  try{
+    const word=decodeURIComponent(w);
+    const out=await dictLookup(word);
+    if(out.audio){
+      const a=new Audio(out.audio);
+      a.play();
+    }else{
+      alert('未找到可用发音音频（该API可能无该词音频）。');
+    }
+  }catch(e){ alert('发音失败：'+(e?.message||e)); }
+}
+
+// ---- Hotwords
+let HOT_IMPORT_OPEN=false;
+function getHotwords(){ return getUD().hotwords||[]; }
+function setHotwords(x){ const d=getUD(); d.hotwords=x; setUD(d); sync('ok'); }
+async function hotUpdate(){
+  try{
+    const res=await fetch('./hotwords.json?ts='+Date.now());
+    if(!res.ok) throw new Error('未找到 hotwords.json（建议配置 GitHub Actions 自动生成）');
+    const js=await res.json();
+    if(!Array.isArray(js)) throw new Error('格式应为数组');
+    setHotwords(js);
+    alert('更新成功：'+js.length+'条');
+    render();
+  }catch(e){
+    alert('更新失败：'+(e?.message||e));
+  }
+}
+function hotOpenImport(v=true){ HOT_IMPORT_OPEN = (v!==false); render(); }
+function hotClear(){ setHotwords([]); render(); }
+function hotDoImport(){
+  const ta=document.getElementById('hotTa');
+  if(!ta) return;
+  const txt=ta.value.trim();
+  if(!txt){ alert('请先粘贴内容'); return; }
+  try{
+    let arr=[];
+    if(txt.startsWith('[')){
+      arr=JSON.parse(txt);
+    }else{
+      arr=txt.split(/\n+/).map(line=>line.trim()).filter(Boolean).map(line=>{
+        const parts=line.split('|||').map(x=>x.trim());
+        return {en:parts[0]||'',cn:parts[1]||'',note:parts[2]||'',date:parts[3]||ymd(),src:parts[4]||'manual'};
+      });
+    }
+    arr=arr.filter(x=>x.en||x.cn);
+    const cur=getHotwords();
+    setHotwords([...arr,...cur].slice(0,5000));
+    HOT_IMPORT_OPEN=false;
+    alert('导入成功：'+arr.length+'条');
+    render();
+  }catch(e){
+    alert('导入失败：'+(e?.message||e));
+  }
+}
+
+// ---- Cloud (Firebase optional)
+function getCloudCfg(){
+  try{ return JSON.parse(localStorage.getItem(AK+'_cloudcfg')||'null'); }catch{ return null; }
+}
+function setCloudCfg(cfg){ localStorage.setItem(AK+'_cloudcfg',JSON.stringify(cfg||null)); }
+async function cloudInit(){
+  const cfg=getCloudCfg();
+  if(!cfg?.cfg) throw new Error('未填写 Firebase Config');
+  if(window.__fb) return window.__fb;
+  const appMod=await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
+  const authMod=await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js');
+  const fsMod=await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
+  const app=appMod.initializeApp(JSON.parse(cfg.cfg));
+  const auth=authMod.getAuth(app);
+  const db=fsMod.getFirestore(app);
+  window.__fb={app,auth,db,authMod,fsMod};
+  return window.__fb;
+}
+function cloudSaveCfg(){
+  try{
+    const cfgStr=document.getElementById('fbCfg')?.value.trim();
+    const email=document.getElementById('fbEmail')?.value.trim();
+    const pass=document.getElementById('fbPass')?.value;
+    if(cfgStr){ JSON.parse(cfgStr); } // validate
+    setCloudCfg({cfg:cfgStr||'',email:email||'',pass:pass||''});
+    alert('已保存云同步配置（注意：密码会保存在本设备浏览器中）。');
+  }catch(e){ alert('保存失败：'+(e?.message||e)); }
+}
+async function cloudConnect(){
+  try{
+    const cfg=getCloudCfg();
+    if(!cfg?.email||!cfg?.pass) throw new Error('请先填写云账号邮箱与密码');
+    const fb=await cloudInit();
+    const {signInWithEmailAndPassword,createUserWithEmailAndPassword}=fb.authMod;
+    try{
+      await signInWithEmailAndPassword(fb.auth,cfg.email,cfg.pass);
+    }catch(e){
+      // 若不存在则创建
+      await createUserWithEmailAndPassword(fb.auth,cfg.email,cfg.pass);
+    }
+    await cloudPull();
+    alert('云端连接成功，并已拉取数据。');
+  }catch(e){ alert('连接失败：'+(e?.message||e)); }
+}
+async function cloudPull(){
+  const cfg=getCloudCfg();
+  const fb=await cloudInit();
+  const {doc,getDoc}=fb.fsMod;
+  const u=fb.auth.currentUser;
+  if(!u) throw new Error('未登录云账号');
+  const ref=doc(fb.db,'catti_pro',u.uid);
+  const snap=await getDoc(ref);
+  if(snap.exists()){
+    const data=snap.data()?.data;
+    if(data && typeof data==='object'){
+      setUD(data);
+      sync('ok');
+      render();
+    }
+  }
+}
+async function cloudPush(){
+  try{
+    const fb=await cloudInit();
+    const {doc,setDoc,serverTimestamp}=fb.fsMod;
+    const u=fb.auth.currentUser;
+    if(!u) throw new Error('请先点击“连接并拉取”登录云账号');
+    const ref=doc(fb.db,'catti_pro',u.uid);
+    await setDoc(ref,{data:getUD(),updatedAt:serverTimestamp?serverTimestamp():new Date().toISOString()},{merge:true});
+    alert('已推送到云端。');
+  }catch(e){ alert('推送失败：'+(e?.message||e)); }
+}
+function cloudDisable(){ setCloudCfg(null); alert('已关闭云同步（本地数据不受影响）。'); render(); }
+async function cloudSyncNow(){
+  const cfg=getCloudCfg();
+  if(!cfg?.cfg){
+    alert('未启用云同步：你可以在「数据/同步」里配置 Firebase（免费额度），或继续使用导入/导出换设备。');
+    return;
+  }
+  // 尝试连接并推送
+  await cloudConnect();
+  await cloudPush();
+}
+
 function exportData(){
   const d=getUD();
   const blob=new Blob([JSON.stringify({user:CU,exportAt:new Date().toISOString(),data:d},null,2)],{type:'application/json'});
