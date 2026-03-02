@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="CATTI PRO"/>
+<title>CATTI 备考专业系统 · PRO版</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#020810;--s1:#070e1c;--card:#0c1525;--card2:#101d2e;
+  --b1:#182033;--b2:#1e2d45;
+  --cyan:#00e5ff;--cyan2:#00b4cc;--indigo:#818cf8;--green:#34d399;
+  --red:#fb7185;--yellow:#fbbf24;--orange:#fb923c;--purple:#c084fc;
+  --text:#dceeff;--muted:#3d5a7a;--muted2:#5a7a9a;
+  --mono:'Space Mono',monospace;--body:'Noto Sans SC',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--body);}
+button{font-family:var(--body);cursor:pointer;}
+input,textarea,select{font-family:var(--body);}
+textarea{resize:none;}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+body::before{content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,229,255,.008) 3px,rgba(0,229,255,.008) 4px);
+  pointer-events:none;z-index:9998;}
+/* GLOW BG */
+body::after{content:'';position:fixed;top:-30%;left:-20%;width:60%;height:60%;
+  background:radial-gradient(ellipse,rgba(0,60,100,.25),transparent 70%);
+  pointer-events:none;z-index:0;}
+
+/* ─── AUTH ─────────────────────────────── */
+#auth{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 90% 90% at 50% -10%,#00182e,#020810 65%);
+  padding:20px;z-index:500;}
+.abox{width:100%;max-width:400px;position:relative;z-index:1;}
+.alogo{text-align:center;margin-bottom:30px;}
+.alogo-main{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:6px;
+  color:var(--cyan);text-shadow:0 0 40px rgba(0,229,255,.5),0 0 80px rgba(0,229,255,.2);}
+.alogo-sub{font-size:11px;color:var(--muted2);letter-spacing:3px;margin-top:6px;font-family:var(--mono);}
+.alogo-ver{display:inline-block;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.2);
+  color:var(--cyan);font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:10px;margin-top:8px;}
+.acard{background:rgba(12,21,37,.97);border:1px solid var(--b2);border-radius:16px;
+  padding:24px;backdrop-filter:blur(30px);
+  box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(0,229,255,.05);}
+.atabs{display:flex;border:1px solid var(--b1);border-radius:8px;overflow:hidden;margin-bottom:20px;}
+.atab{flex:1;padding:9px;border:none;background:transparent;color:var(--muted2);
+  font-size:12px;font-family:var(--mono);transition:.2s;}
+.atab.on{background:rgba(0,229,255,.1);color:var(--cyan);}
+.f{margin-bottom:14px;}
+.f label{display:block;font-size:10px;color:var(--muted2);letter-spacing:1.5px;
+  margin-bottom:5px;font-family:var(--mono);}
+.inp{background:#040c18;border:1px solid var(--b1);color:var(--text);
+  padding:10px 13px;border-radius:8px;font-size:13px;outline:none;width:100%;transition:.2s;}
+.inp:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.06);}
+.abtn{width:100%;padding:12px;border-radius:8px;
+  border:1px solid rgba(0,229,255,.25);
+  background:linear-gradient(135deg,rgba(0,229,255,.1),rgba(129,140,248,.1));
+  color:var(--cyan);font-size:13px;font-weight:700;letter-spacing:2px;
+  font-family:var(--mono);transition:.2s;margin-top:2px;}
+.abtn:hover{background:linear-gradient(135deg,rgba(0,229,255,.18),rgba(129,140,248,.18));}
+.amsg{text-align:center;font-size:11px;margin-top:9px;min-height:14px;font-family:var(--mono);}
+
+/* ─── APP ─────────────────────────────── */
+#app{display:none;flex-direction:column;height:100vh;max-width:900px;margin:0 auto;position:relative;z-index:1;}
+#app.show{display:flex;}
+
+/* Top bar */
+.tb{background:rgba(7,14,28,.98);border-bottom:1px solid var(--b1);
+  padding:10px 14px 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(30px);}
+.tb1{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.tlogo{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:3px;color:var(--cyan);}
+.tright{display:flex;align-items:center;gap:8px;}
+.net{display:flex;align-items:center;gap:4px;font-size:10px;font-family:var(--mono);}
+.ndot{width:5px;height:5px;border-radius:50%;}
+.ndot.on{background:var(--green);box-shadow:0 0 5px var(--green);}
+.ndot.off{background:var(--red);}
+.av{width:27px;height:27px;border-radius:50%;
+  background:linear-gradient(135deg,var(--cyan),var(--indigo));
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#000;font-family:var(--mono);}
+.un{font-size:10px;color:var(--muted2);font-family:var(--mono);}
+.syn{font-size:9px;color:var(--muted);font-family:var(--mono);}
+.dot2{display:inline-block;width:4px;height:4px;border-radius:50%;margin-right:3px;vertical-align:middle;}
+.dok{background:var(--green);}
+.dsav{background:var(--yellow);animation:pulse 1s infinite;}
+@keyframes pulse{50%{opacity:.2}}
+.lbtn{background:transparent;border:1px solid var(--b1);color:var(--muted);
+  padding:3px 8px;border-radius:5px;font-size:10px;font-family:var(--mono);}
+.tb2{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;margin-bottom:10px;}
+.lvsw{display:flex;gap:5px;}
+.lv{padding:4px 12px;border-radius:18px;border:1px solid var(--b1);
+  background:transparent;color:var(--muted);font-size:11px;font-weight:700;
+  font-family:var(--mono);transition:.15s;}
+.lv.a2{border-color:var(--cyan);background:rgba(0,229,255,.08);color:var(--cyan);}
+.lv.a3{border-color:var(--green);background:rgba(52,211,153,.08);color:var(--green);}
+.ei{font-size:10px;color:var(--muted);font-family:var(--mono);}
+
+/* Nav tabs - two rows: main + sub */
+.nav{display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--b1);}
+.nav::-webkit-scrollbar{display:none;}
+.nt{padding:8px 12px;border-bottom:2px solid transparent;border-top:none;border-left:none;border-right:none;
+  background:transparent;color:var(--muted);font-size:11px;font-family:var(--mono);
+  white-space:nowrap;transition:.15s;letter-spacing:.3px;}
+.nt.on{color:var(--cyan);border-bottom-color:var(--cyan);}
+.nt.kb{color:var(--indigo);}
+.nt.kb.on{color:var(--indigo);border-bottom-color:var(--indigo);}
+.nt.pn{color:var(--yellow);}
+.nt.pn.on{color:var(--yellow);border-bottom-color:var(--yellow);}
+
+/* Content */
+.main{flex:1;overflow-y:auto;padding:14px;padding-bottom:50px;}
+
+/* ─── CARDS ────────────── */
+.card{background:var(--card);border:1px solid var(--b1);border-radius:14px;padding:14px;margin-bottom:12px;}
+.ct{font-size:11px;font-weight:700;margin-bottom:12px;letter-spacing:1px;font-family:var(--mono);}
+.mu{color:var(--muted);font-size:11px;font-family:var(--mono);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.lb{display:block;font-size:10px;color:var(--muted2);margin-bottom:4px;font-family:var(--mono);letter-spacing:.5px;}
+.ai{background:#040c18;border:1px solid var(--b1);color:var(--text);
+  padding:8px 11px;border-radius:7px;font-size:13px;outline:none;width:100%;transition:.2s;}
+.ai:focus{border-color:var(--cyan);}
+.ta{height:72px;}
+
+/* Buttons */
+.btn{width:100%;padding:10px;border-radius:7px;border:none;
+  font-size:11px;font-weight:700;letter-spacing:1px;transition:.15s;font-family:var(--mono);}
+.bc{background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.2);color:var(--cyan);}
+.br{background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.2);color:var(--red);}
+.bi{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.2);color:var(--indigo);}
+.bg{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:var(--green);}
+.by{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);color:var(--yellow);}
+.bp{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.2);color:var(--purple);}
+.sm{padding:3px 8px;border-radius:9px;border:1px solid var(--b1);background:transparent;color:var(--muted);font-size:10px;font-family:var(--mono);}
+.sm.ok{border-color:var(--green);color:var(--green);background:rgba(52,211,153,.07);}
+.sm.dl{border-color:rgba(251,113,133,.2);color:var(--red);}
+
+/* Score */
+.sr{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:11px;}
+.sc{background:#040c18;border-radius:9px;padding:11px;text-align:center;border:1px solid var(--b1);}
+.sn{font-size:24px;font-weight:700;font-family:var(--mono);line-height:1;}
+.sl{font-size:10px;color:var(--muted);margin-top:4px;font-family:var(--mono);letter-spacing:.5px;}
+.ss{font-size:10px;color:var(--muted2);margin-top:2px;}
+.pb{background:#070e1c;border-radius:3px;height:4px;overflow:hidden;margin-top:4px;}
+.pf{height:100%;border-radius:3px;transition:width 1s ease;}
+.pr{display:flex;justify-content:space-between;align-items:center;font-size:10px;}
+
+/* Tags */
+.tags{display:flex;flex-wrap:wrap;gap:4px;}
+.tag{font-size:10px;padding:2px 7px;border-radius:8px;font-family:var(--mono);white-space:nowrap;}
+.t-8{background:rgba(0,229,255,.08);color:var(--cyan);border:1px solid rgba(0,229,255,.15);}
+.t-k{background:rgba(52,211,153,.08);color:var(--green);border:1px solid rgba(52,211,153,.15);}
+.t-3b{background:rgba(129,140,248,.08);color:var(--indigo);border:1px solid rgba(129,140,248,.15);}
+.t-2b{background:rgba(251,191,36,.08);color:var(--yellow);border:1px solid rgba(251,191,36,.15);}
+.t-1b{background:rgba(251,113,133,.08);color:var(--red);border:1px solid rgba(251,113,133,.15);}
+.t-3k{background:rgba(192,132,252,.08);color:var(--purple);border:1px solid rgba(192,132,252,.15);}
+.t-2k{background:rgba(251,146,60,.08);color:var(--orange);border:1px solid rgba(251,146,60,.15);}
+.t-1k{background:rgba(20,184,166,.08);color:#2dd4bf;border:1px solid rgba(20,184,166,.15);}
+.tcat{background:rgba(30,45,69,.6);color:var(--muted2);border:1px solid var(--b1);font-size:10px;padding:2px 7px;border-radius:8px;font-family:var(--mono);}
+
+/* Chips filter */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px;}
+.chip{padding:4px 11px;border-radius:18px;border:1px solid var(--b1);
+  background:transparent;color:var(--muted);font-size:11px;font-family:var(--mono);transition:.12s;}
+.chip.on{border-color:var(--cyan);background:rgba(0,229,255,.07);color:var(--cyan);}
+
+/* ─── VOCAB CARD ──────── */
+.vclist{display:flex;flex-direction:column;gap:9px;}
+.vc{background:var(--card);border:1px solid var(--b1);border-radius:11px;padding:13px;
+  border-left:3px solid var(--b2);transition:.2s;}
+.vc:hover{border-color:var(--b2);border-left-color:var(--cyan);}
+.vc.mastered{border-left-color:var(--green);opacity:.65;}
+.vc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:7px;}
+.vc-en{font-size:15px;font-weight:700;color:var(--text);}
+.vc-cn{font-size:13px;color:var(--cyan);margin:4px 0;}
+.vc-mem{font-size:12px;color:var(--muted2);line-height:1.6;margin-top:5px;
+  padding:7px 9px;background:#040c18;border-radius:6px;}
+.vc-btns{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
+
+/* Flashcard */
+.flash-wrap{perspective:1000px;cursor:pointer;margin-bottom:14px;}
+.flash-inner{position:relative;width:100%;transform-style:preserve-3d;
+  transition:transform .5s cubic-bezier(.4,0,.2,1);}
+.flash-inner.flipped{transform:rotateY(180deg);}
+.flash-f,.flash-b{width:100%;backface-visibility:hidden;background:var(--card);
+  border:1px solid var(--b1);border-radius:14px;padding:28px 20px;text-align:center;
+  min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.flash-b{position:absolute;top:0;left:0;transform:rotateY(180deg);
+  border-color:rgba(0,229,255,.2);background:rgba(0,45,70,.3);}
+.flash-hint{font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:12px;}
+.flash-q{font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.flash-sub{font-size:13px;color:var(--muted2);}
+.flash-a{font-size:20px;font-weight:700;color:var(--cyan);}
+.flash-mem{font-size:12px;color:var(--muted2);margin-top:10px;line-height:1.6;}
+.flash-nav{display:flex;gap:8px;margin-bottom:14px;}
+.flash-prog{text-align:center;font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px;}
+
+/* ─── COLLOCATION CARD ── */
+.col-card{background:var(--card);border:1px solid var(--b1);border-radius:11px;padding:13px;margin-bottom:9px;}
+.col-en{font-size:16px;font-weight:700;color:var(--cyan);font-family:var(--mono);}
+.col-cn{font-size:13px;color:var(--text);margin:5px 0;}
+.col-ex{background:#040c18;border-radius:7px;padding:10px;margin-top:8px;}
+.col-ex-en{font-size:13px;line-height:1.7;color:var(--text);}
+.col-ex-cn{font-size:12px;color:var(--muted2);margin-top:4px;}
+.col-note{font-size:11px;color:var(--indigo);margin-top:7px;font-style:italic;}
+
+/* ─── TECHNIQUE CARD ──── */
+.tech-card{background:var(--card);border:1px solid var(--b1);border-radius:12px;padding:14px;margin-bottom:9px;}
+.tech-name{font-size:15px;font-weight:700;color:var(--yellow);}
+.tech-en{font-size:11px;color:var(--muted2);font-family:var(--mono);margin-bottom:6px;}
+.tech-desc{font-size:13px;color:var(--text);line-height:1.7;margin-bottom:10px;}
+.tech-ex{background:#040c18;border-radius:8px;padding:12px;}
+.t-src{font-size:12px;color:var(--muted);margin-bottom:6px;font-family:var(--mono);}
+.t-cn{font-size:13px;color:var(--text);margin-bottom:10px;padding:6px 0;border-bottom:1px solid var(--b1);}
+.t-best{background:rgba(52,211,153,.06);border-radius:6px;padding:9px;margin-bottom:6px;}
+.t-best-lbl{font-size:10px;color:var(--green);font-family:var(--mono);margin-bottom:4px;}
+.t-best-txt{font-size:13px;color:var(--text);line-height:1.7;}
+.t-alt{background:rgba(129,140,248,.05);border-radius:6px;padding:9px;margin-bottom:6px;}
+.t-alt-lbl{font-size:10px;color:var(--indigo);font-family:var(--mono);margin-bottom:4px;}
+.t-alt-txt{font-size:13px;color:var(--text);line-height:1.7;}
+.t-note{font-size:11px;color:var(--muted2);margin-top:8px;padding-top:8px;border-top:1px solid var(--b1);line-height:1.6;}
+
+/* ─── PROPER NOUNS ──────── */
+.pn-card{display:flex;justify-content:space-between;align-items:flex-start;
+  background:var(--card);border:1px solid var(--b1);border-radius:10px;
+  padding:12px;margin-bottom:7px;gap:10px;}
+.pn-cn{font-size:13px;font-weight:700;color:var(--text);flex:1;}
+.pn-en{font-size:12px;color:var(--cyan);font-family:var(--mono);margin-top:3px;}
+.pn-cat-lbl{font-size:10px;color:var(--muted2);white-space:nowrap;font-family:var(--mono);}
+
+/* ─── QUIZ ────────────── */
+.qcard{background:#040c18;border-radius:10px;padding:14px;border:1px solid var(--b1);}
+.qtxt{font-size:14px;line-height:1.8;margin-bottom:13px;white-space:pre-line;}
+.qopts{display:flex;flex-direction:column;gap:6px;}
+.qo{padding:9px 13px;border-radius:7px;border:1px solid var(--b1);
+  background:transparent;color:var(--text);text-align:left;font-size:13px;transition:.15s;}
+.qo:hover:not([disabled]){border-color:var(--cyan);background:rgba(0,229,255,.04);}
+.qo.ok{border-color:var(--green)!important;background:rgba(52,211,153,.1);color:var(--green);}
+.qo.ng{border-color:var(--red)!important;background:rgba(251,113,133,.1);color:var(--red);}
+.qexp{margin-top:12px;background:#070e1c;border-radius:9px;padding:14px;border:1px solid var(--b1);}
+.qexp-title{font-size:10px;font-family:var(--mono);color:var(--yellow);margin-bottom:8px;letter-spacing:1px;}
+.qexp-sect{margin-bottom:10px;}
+.qexp-sh{font-size:10px;font-family:var(--mono);color:var(--muted2);margin-bottom:4px;letter-spacing:.5px;}
+.qexp-txt{font-size:12px;line-height:1.8;color:var(--text);}
+.best-ans{background:rgba(52,211,153,.06);border-radius:6px;padding:9px;margin:6px 0;}
+.alt-ans{background:rgba(129,140,248,.05);border-radius:6px;padding:9px;margin:6px 0;}
+
+/* ─── ERROR NOTE ───────── */
+.en-card{background:var(--card);border:1px solid var(--b1);border-radius:11px;
+  padding:13px;margin-bottom:10px;border-left:3px solid var(--red);}
+.en-card.done{border-left-color:var(--green);opacity:.65;}
+.en-hdr{display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px;margin-bottom:10px;}
+.etag{font-size:10px;padding:2px 9px;border-radius:9px;
+  background:rgba(0,229,255,.07);color:var(--cyan);border:1px solid rgba(0,229,255,.12);font-family:var(--mono);}
+.ecols{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px;}
+.ecol{background:#040c18;border-radius:7px;padding:9px;}
+.eclbl{font-size:10px;font-family:var(--mono);margin-bottom:4px;letter-spacing:.5px;}
+.ectxt{font-size:13px;line-height:1.6;}
+.nbox{background:#040c18;border-radius:7px;padding:13px;margin-top:9px;
+  border:1px solid rgba(129,140,248,.1);}
+.npre{font-size:12px;line-height:2;white-space:pre-wrap;color:var(--text);}
+
+/* ─── STATS ───────────── */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;}
+.stat-cell{background:#040c18;border-radius:10px;padding:13px;text-align:center;border:1px solid var(--b1);}
+.stat-num{font-size:28px;font-weight:700;font-family:var(--mono);line-height:1;}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:5px;font-family:var(--mono);}
+
+/* Review / Guide */
+.rb{background:#040c18;border-radius:9px;padding:13px;margin-bottom:9px;border:1px solid var(--b1);}
+.rt{font-size:10px;font-weight:700;margin-bottom:7px;font-family:var(--mono);letter-spacing:1px;}
+.rr{font-size:13px;line-height:2;}
+.gs{background:var(--card);border:1px solid var(--b1);border-radius:11px;padding:13px;margin-bottom:10px;}
+.gi{font-size:13px;padding:6px 0;border-bottom:1px solid rgba(24,32,51,.6);line-height:1.7;}
+.gi:last-child{border-bottom:none;}
+
+/* DL bar */
+.dlbar{background:rgba(0,229,255,.03);border:1px solid rgba(0,229,255,.1);border-radius:9px;
+  padding:10px 13px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:9px;}
+.dlbtn{padding:5px 12px;border-radius:6px;border:1px solid rgba(0,229,255,.2);
+  background:rgba(0,229,255,.08);color:var(--cyan);font-size:10px;font-weight:700;font-family:var(--mono);}
+
+/* Mode switch */
+.mode-sw{display:flex;border:1px solid var(--b1);border-radius:8px;overflow:hidden;margin-bottom:12px;}
+.ms-btn{flex:1;padding:8px;border:none;background:transparent;color:var(--muted);
+  font-size:11px;font-family:var(--mono);transition:.2s;}
+.ms-btn.on{background:rgba(0,229,255,.09);color:var(--cyan);}
+
+/* Charts */
+.csc{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+
+@media(max-width:480px){
+  .ecols{grid-template-columns:1fr;}
+  .g3{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth">
+  <div class="abox">
+    <div class="alogo">
+      <div class="alogo-main">CATTI</div>
+      <div class="alogo-sub">PRO TRANSLATION SYSTEM</div>
+      <div><span class="alogo-ver">v3.0 · 二级 & 三级 · 完整版</span></div>
+    </div>
+    <div class="acard">
+      <div class="atabs">
+        <button class="atab on" id="at1" onclick="showATab('login')">登 录</button>
+        <button class="atab" id="at2" onclick="showATab('reg')">注 册</button>
+      </div>
+      <div id="pl">
+        <div class="f"><label>账号</label><input class="inp" id="lu" placeholder="用户名" autocomplete="username"/></div>
+        <div class="f"><label>密码</label><input class="inp" type="password" id="lp" placeholder="密码" autocomplete="current-password"/></div>
+        <button class="abtn" onclick="doLogin()">登 录</button>
+        <div class="amsg" id="lm"></div>
+      </div>
+      <div id="pr2" style="display:none">
+        <div class="f"><label>设置用户名</label><input class="inp" id="ru" placeholder="2-20位，中英文数字" autocomplete="username"/></div>
+        <div class="f"><label>设置密码</label><input class="inp" type="password" id="rp" placeholder="至少6位" autocomplete="new-password"/></div>
+        <div class="f"><label>确认密码</label><input class="inp" type="password" id="rp2" placeholder="再次输入" autocomplete="new-password"/></div>
+        <button class="abtn" onclick="doReg()">注 册</button>
+        <div class="amsg" id="rm"></div>
+        <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.7">
+          数据存储在本设备 · 换设备前请导出备份<br>账号密码请妥善保存
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="tb">
+    <div class="tb1">
+      <div class="tlogo" id="tlogo">CATTI_PRO</div>
+      <div class="tright">
+        <div class="net"><div class="ndot on" id="nd"></div><span id="nt">在线</span></div>
+        <div class="av" id="uav">U</div>
+        <div>
+          <div class="un" id="un"></div>
+          <div class="syn"><span class="dot2 dok" id="sd"></span><span id="st">已同步</span></div>
+        </div>
+        <button class="lbtn" onclick="logout()">退出</button>
+      </div>
+    </div>
+    <div class="tb2">
+      <div class="lvsw">
+        <button class="lv" id="lb2" onclick="switchLv(2)">📘 二级</button>
+        <button class="lv" id="lb3" onclick="switchLv(3)">📗 三级</button>
+      </div>
+      <div class="ei" id="ei"></div>
+    </div>
+    <div class="nav" id="nav"></div>
+  </div>
+  <div class="main" id="main"></div>
+</div>
+
+<script>
+/* ================================================================
+   DATA - 知识库
+   ================================================================ */
+const VOCAB_DB=[
+  {id:1,en:"quantitative easing",cn:"量化宽松",tags:["二笔","一笔","二口","一口"],cat:"经济金融",mem:"量化(quantitative)+宽松(easing)，央行大量购债注入流动性"},
+  {id:2,en:"fiscal policy",cn:"财政政策",tags:["考研","三笔","二笔","一笔"],cat:"经济金融",mem:"fiscal=财政，区别monetary policy=货币政策"},
+  {id:3,en:"monetary policy",cn:"货币政策",tags:["考研","三笔","二笔","一笔","三口"],cat:"经济金融",mem:"monetary=货币的，与fiscal policy合称宏观调控两大工具"},
+  {id:4,en:"GDP (Gross Domestic Product)",cn:"国内生产总值",tags:["专八","三笔","二笔","一笔"],cat:"经济金融",mem:"Gross=总，Domestic=国内，Product=产值，三词首字母"},
+  {id:5,en:"supply-side structural reform",cn:"供给侧结构性改革",tags:["二笔","一笔","二口","一口"],cat:"政治经济",mem:"官方标准译法，supply-side不可省略side"},
+  {id:6,en:"rural vitalization strategy",cn:"乡村振兴战略",tags:["二笔","一笔","二口","一口"],cat:"政治经济",mem:"vitalization=振兴，官方选词，不可用revival/development"},
+  {id:7,en:"carbon neutrality",cn:"碳中和",tags:["专八","二笔","一笔","三口","二口"],cat:"环境科技",mem:"carbon=碳，neutrality=中立/净零排放状态"},
+  {id:8,en:"carbon peaking",cn:"碳达峰",tags:["专八","二笔","一笔","三口","二口"],cat:"环境科技",mem:"peaking=达到最高点，双碳目标：2030碳达峰+2060碳中和"},
+  {id:9,en:"sustainable development",cn:"可持续发展",tags:["考研","专八","三笔","二笔"],cat:"环境政策",mem:"sustainable=可持续，1987年布伦特兰报告标准术语"},
+  {id:10,en:"resilience",cn:"韧性/抗冲击能力",tags:["专八","二笔","一笔"],cat:"经济政治",mem:"经济韧性≠弹性(elasticity)，侧重抗压恢复能力"},
+  {id:11,en:"multilateralism",cn:"多边主义",tags:["二笔","一笔","二口","一口"],cat:"外交政治",mem:"multi=多边，-lateral=方向，-ism=主义，对应unilateralism单边主义"},
+  {id:12,en:"Belt and Road Initiative",cn:"一带一路倡议",tags:["二笔","一笔","二口","一口"],cat:"外交政策",mem:"Initiative=倡议（官方），非plan/project，BRI缩写"},
+  {id:13,en:"community with a shared future for mankind",cn:"人类命运共同体",tags:["二笔","一笔","二口","一口"],cat:"外交政治",mem:"官方固定译法，shared future=共同未来，for mankind不可省"},
+  {id:14,en:"targeted poverty alleviation",cn:"精准扶贫",tags:["二笔","一笔","二口"],cat:"社会政策",mem:"targeted=精准，alleviation=缓解，区分poverty eradication（消除贫困）"},
+  {id:15,en:"whole-process people's democracy",cn:"全过程人民民主",tags:["二笔","一笔","一口"],cat:"政治",mem:"whole-process=全过程，习近平新时代重要政治概念"},
+  {id:16,en:"green development",cn:"绿色发展",tags:["考研","专八","三笔","二笔"],cat:"发展理念",mem:"五大发展理念：创新/协调/绿色/开放/共享"},
+  {id:17,en:"new quality productive forces",cn:"新质生产力",tags:["二笔","一笔","二口","一口"],cat:"经济政策",mem:"2024新提法，quality productive forces=质生产力"},
+  {id:18,en:"high-quality development",cn:"高质量发展",tags:["二笔","一笔","三口","二口"],cat:"经济政策",mem:"high-quality强调发展质量而非速度，对应粗放增长"},
+  {id:19,en:"digital economy",cn:"数字经济",tags:["专八","二笔","一笔","三口"],cat:"科技经济",mem:"digital=数字化，十四五规划核心词"},
+  {id:20,en:"real economy",cn:"实体经济",tags:["二笔","一笔"],cat:"经济",mem:"区别虚拟经济（virtual/fictitious economy），制造业是实体经济主体"},
+  {id:21,en:"ecological civilization",cn:"生态文明",tags:["专八","二笔","一笔"],cat:"环境政治",mem:"五位一体总体布局之一，ecological=生态的"},
+  {id:22,en:"innovation-driven development",cn:"创新驱动发展",tags:["二笔","一笔"],cat:"发展战略",mem:"innovation-driven=以创新为驱动力"},
+  {id:23,en:"people-centered development philosophy",cn:"以人民为中心的发展思想",tags:["二笔","一笔","一口"],cat:"政治理念",mem:"people-centered=以人民为中心，核心政治表述"},
+  {id:24,en:"comprehensive national strength",cn:"综合国力",tags:["二笔","一笔","二口","一口"],cat:"政治",mem:"comprehensive=综合，national strength=国力"},
+  {id:25,en:"mixed ownership economy",cn:"混合所有制经济",tags:["二笔","一笔"],cat:"经济政策",mem:"mixed=混合，ownership=所有制"},
+  {id:26,en:"deleveraging",cn:"去杠杆",tags:["二笔","一笔"],cat:"金融政策",mem:"de-=去除前缀，leverage=杠杆，三去一降一补之一"},
+  {id:27,en:"common prosperity",cn:"共同富裕",tags:["二笔","一笔","二口","一口"],cat:"社会政策",mem:"2021年习近平重要讲话后高频词，强调分配公平"},
+  {id:28,en:"rule of law",cn:"法治",tags:["考研","专八","三笔","二笔"],cat:"法律政治",mem:"rule of law=法治，rule by law=依法而治（含义不同）"},
+  {id:29,en:"opening up",cn:"对外开放",tags:["三笔","二笔","一笔"],cat:"经济政策",mem:"reform and opening up=改革开放，固定搭配"},
+  {id:30,en:"reform and opening up",cn:"改革开放",tags:["三笔","二笔","一笔","三口","二口"],cat:"政治经济",mem:"1978年以来的基本国策，官方标准译法"},
+];
+
+const COL_DB=[
+  {id:1,en:"adhere to",cn:"坚持/遵守",ex:"China adheres to the path of peaceful development.",exCn:"中国坚持走和平发展道路。",cat:"政治通用",tags:["二笔","一笔","二口"],note:"比insist on更正式，政治文本首选"},
+  {id:2,en:"give priority to",cn:"优先/把...放在首位",ex:"We should give priority to quality over quantity.",exCn:"我们应将质量置于数量之上。",cat:"通用",tags:["考研","三笔","二笔"],note:"比prioritize更书面正式"},
+  {id:3,en:"make a contribution to",cn:"为...作出贡献",ex:"China has made significant contributions to world peace.",exCn:"中国为世界和平作出了重大贡献。",cat:"外交通用",tags:["考研","三笔","二笔"],note:"固定搭配，to后接名词"},
+  {id:4,en:"in the face of",cn:"面对/面临",ex:"In the face of global challenges, we must cooperate.",exCn:"面对全球性挑战，我们必须加强合作。",cat:"通用",tags:["考研","专八","三笔","二笔"],note:"等同faced with，更正式"},
+  {id:5,en:"play a...role in",cn:"在...中发挥...作用",ex:"Technology plays a crucial role in economic development.",exCn:"科技在经济发展中发挥着至关重要的作用。",cat:"通用",tags:["考研","专八","三笔","二笔"],note:"role前可换：key/vital/significant/pivotal/indispensable"},
+  {id:6,en:"be committed to",cn:"致力于",ex:"The government is committed to improving public services.",exCn:"政府致力于改善公共服务。",cat:"政治通用",tags:["专八","三笔","二笔"],note:"后接名词或doing，强调长期承诺"},
+  {id:7,en:"in line with",cn:"符合/与...一致",ex:"This policy is in line with international standards.",exCn:"这项政策与国际标准相符。",cat:"通用",tags:["考研","三笔","二笔"],note:"等同consistent with，更简洁"},
+  {id:8,en:"at the expense of",cn:"以...为代价",ex:"We cannot develop at the expense of the environment.",exCn:"我们不能以牺牲环境为代价谋求发展。",cat:"通用",tags:["专八","三笔","二笔"],note:"高频对比句型，翻译中极常见"},
+  {id:9,en:"with a view to",cn:"目的是/为了",ex:"We reform with a view to improving people's lives.",exCn:"我们推进改革，旨在改善民众生活。",cat:"通用",tags:["专八","二笔","一笔"],note:"后接doing，比in order to更正式"},
+  {id:10,en:"strike a balance between...and",cn:"在...和...之间取得平衡",ex:"We must strike a balance between development and conservation.",exCn:"我们必须在发展与保护之间寻求平衡。",cat:"通用",tags:["专八","二笔","一笔"],note:"高频句型，balance后也可用among"},
+  {id:11,en:"on the basis of",cn:"在...基础上",ex:"Cooperation should be on the basis of mutual respect.",exCn:"合作应以相互尊重为基础。",cat:"外交政治",tags:["三笔","二笔","一笔"],note:"等同based on，更正式"},
+  {id:12,en:"keep pace with",cn:"跟上/与...同步",ex:"Education must keep pace with technological change.",exCn:"教育必须跟上科技变化的步伐。",cat:"通用",tags:["考研","专八","三笔"],note:"也可keep up with，pace更正式"},
+  {id:13,en:"win-win cooperation",cn:"互利共赢的合作",ex:"China advocates win-win cooperation with all nations.",exCn:"中国倡导与各国开展互利共赢合作。",cat:"外交",tags:["二笔","一笔","二口","一口"],note:"外交高频词组，必须掌握"},
+  {id:14,en:"bring...opportunities and challenges",cn:"给...带来机遇与挑战",ex:"AI has brought both opportunities and challenges to industries.",exCn:"人工智能给各行各业带来了机遇与挑战。",cat:"通用",tags:["考研","三笔","二笔"],note:"经典句型，固定搭配"},
+  {id:15,en:"take concrete measures to",cn:"采取切实措施",ex:"The government has taken concrete measures to tackle poverty.",exCn:"政府已采取切实措施应对贫困问题。",cat:"政治通用",tags:["三笔","二笔","一笔"],note:"concrete=具体有效的，比general/specific更正式"},
+  {id:16,en:"lay a solid foundation for",cn:"为...奠定坚实基础",ex:"Education lays a solid foundation for national development.",exCn:"教育为国家发展奠定了坚实基础。",cat:"通用",tags:["三笔","二笔","一笔"],note:"lay the foundation=奠定基础，solid强调质量"},
+  {id:17,en:"enhance mutual understanding",cn:"增进相互了解",ex:"Cultural exchange enhances mutual understanding between peoples.",exCn:"文化交流增进了各国人民的相互了解。",cat:"外交",tags:["三笔","二笔","二口"],note:"外交常用表达，enhance>improve>increase（正式程度递减）"},
+  {id:18,en:"usher in a new era of",cn:"开启...新时代/新纪元",ex:"Reform and opening up ushered in a new era of development.",exCn:"改革开放开启了发展的新时代。",cat:"政治通用",tags:["二笔","一笔","二口"],note:"usher in比begin/start更正式，用于重大历史节点"},
+];
+
+const TECH_DB=[
+  {id:1,name:"增译法",en:"Amplification",desc:"汉语意合（靠语义逻辑），英语形合（靠连接词）。翻译时需增加原文中隐含但英语读者需要的词语。",cn:"经济建设要质量，不要数量。",best:"Economic development should prioritize quality over quantity.",alt1:"We should value quality, not quantity, in economic development.",note:"增加了Economic development主语 + should使逻辑显化，不能直译\"经济建设\"为economy building",tags:["三笔","二笔","一笔"]},
+  {id:2,name:"减译法",en:"Omission",desc:"汉语中为加强语气而重复的成分，翻译成英语时可省略，以符合英语简洁原则。",cn:"我们要认真学习，刻苦钻研，努力工作。",best:"We should study diligently and work hard.",alt1:"We must apply ourselves to study and work with dedication.",note:"三个并列结构合并为两个，避免英语表达中的冗余感",tags:["三笔","二笔","一笔"]},
+  {id:3,name:"转换法",en:"Conversion",desc:"翻译时词性或句式转换以符合目标语习惯：名→动，动→名，主动→被动，正→反。",cn:"这次会议取得了圆满成功。",best:"The conference concluded with great success.",alt1:"The conference was brought to a highly successful conclusion.",note:"\"取得成功\"中名词成功→副词successfully修饰动词，自然流畅",tags:["三笔","二笔","一笔"]},
+  {id:4,name:"分译法",en:"Division",desc:"汉语长句一句话可能含多个信息层，翻译时可拆成英语多个短句或从句，清晰表达逻辑关系。",cn:"中国坚持走和平发展道路，愿与各国开展合作，共同推动构建人类命运共同体。",best:"China adheres to the path of peaceful development. It is committed to working with all nations to build a community with a shared future for mankind.",alt1:"China adheres to peaceful development, willing to cooperate with all countries in building a community with a shared future.",note:"将一个长句拆为两句，逻辑层次更清晰，It指代China",tags:["二笔","一笔"]},
+  {id:5,name:"被动句处理",en:"Passive Voice",desc:"英语多被动，汉语多主动/无主句。翻译时要识别：①无主语句 ②泛指主语（人们/大家） ③强调动作而非施动者。",cn:"这个问题已经得到了妥善解决。",best:"The problem has been properly addressed.",alt1:"This issue has been resolved in an appropriate manner.",note:"汉语无主句直接用英语被动；addressed比resolved更正式，常用于外交/政务语境",tags:["三笔","二笔","一笔"]},
+  {id:6,name:"四字格处理",en:"Idiom Translation",desc:"汉语四字成语翻译以意译为主，保留核心语义，避免逐字翻译；注意保留修辞效果。",cn:"改革开放以来，中国经济取得了突飞猛进的发展。",best:"Since the launch of reform and opening up, China's economy has achieved remarkable and rapid development.",alt1:"China's economy has made giant strides since reform and opening up.",note:"\"突飞猛进\"意译为remarkable and rapid，也可用giant strides（保留比喻色彩）",tags:["二笔","一笔"]},
+  {id:7,name:"正反互译",en:"Negation Shift",desc:"将肯定表达译为否定，或否定译为肯定，使目标语表达更自然地道。",cn:"我们绝不能以牺牲环境为代价换取经济增长。",best:"Under no circumstances should we pursue economic growth at the expense of the environment.",alt1:"We must never allow economic growth to come at the cost of environmental damage.",note:"Under no circumstances放句首引起倒装，比We must not更有力度",tags:["二笔","一笔"]},
+  {id:8,name:"政治文本处理",en:"Political Discourse",desc:"政治类翻译须使用官方标准译法；措辞庄重、立场中正、逻辑严密；注意习惯用语的标准化。",cn:"坚持走中国特色社会主义道路。",best:"We must remain committed to the path of socialism with Chinese characteristics.",alt1:"China will continue to pursue the path of socialism with Chinese characteristics.",note:"adhere to / remain committed to 是政治文本标准搭配，Chinese characteristics官方必须加",tags:["二笔","一笔","二口","一口"]},
+];
+
+const PN_DB=[
+  // 国家机构
+  {id:1,en:"National People's Congress (NPC)",cn:"全国人民代表大会（全国人大）",cat:"国家机构"},
+  {id:2,en:"Standing Committee of the NPC",cn:"全国人大常务委员会",cat:"国家机构"},
+  {id:3,en:"Chinese People's Political Consultative Conference (CPPCC)",cn:"中国人民政治协商会议（全国政协）",cat:"国家机构"},
+  {id:4,en:"State Council",cn:"国务院",cat:"国家机构"},
+  {id:5,en:"Central Military Commission (CMC)",cn:"中央军事委员会（中央军委）",cat:"国家机构"},
+  {id:6,en:"Supreme People's Court",cn:"最高人民法院",cat:"国家机构"},
+  {id:7,en:"Supreme People's Procuratorate",cn:"最高人民检察院",cat:"国家机构"},
+  {id:8,en:"National Development and Reform Commission (NDRC)",cn:"国家发展和改革委员会（国家发改委）",cat:"国家机构"},
+  {id:9,en:"Ministry of Foreign Affairs",cn:"外交部",cat:"国家机构"},
+  {id:10,en:"Ministry of Finance",cn:"财政部",cat:"国家机构"},
+  {id:11,en:"People's Bank of China (PBC)",cn:"中国人民银行（央行）",cat:"国家机构"},
+  // 党的机构
+  {id:12,en:"Communist Party of China (CPC)",cn:"中国共产党（中共）",cat:"党的机构"},
+  {id:13,en:"CPC Central Committee",cn:"中共中央",cat:"党的机构"},
+  {id:14,en:"Political Bureau of the CPC Central Committee",cn:"中共中央政治局",cat:"党的机构"},
+  {id:15,en:"Standing Committee of the Political Bureau",cn:"中共中央政治局常务委员会",cat:"党的机构"},
+  {id:16,en:"Central Commission for Discipline Inspection (CCDI)",cn:"中央纪律检查委员会（中央纪委）",cat:"党的机构"},
+  {id:17,en:"Organization Department of the CPC Central Committee",cn:"中共中央组织部",cat:"党的机构"},
+  {id:18,en:"Publicity Department of the CPC Central Committee",cn:"中共中央宣传部",cat:"党的机构"},
+  // 重要会议
+  {id:19,en:"National Congress of the CPC",cn:"中共全国代表大会（党代会）",cat:"重要会议"},
+  {id:20,en:"Plenary Session of the CPC Central Committee",cn:"中共中央全体会议（全会）",cat:"重要会议"},
+  {id:21,en:"the Third Plenary Session of the 20th CPC Central Committee",cn:"中共二十届三中全会",cat:"重要会议"},
+  {id:22,en:"National People's Congress session",cn:"全国人代会",cat:"重要会议"},
+  {id:23,en:"Two Sessions (Lianghui)",cn:"两会（全国人代会+全国政协会议）",cat:"重要会议"},
+  {id:24,en:"Central Economic Work Conference",cn:"中央经济工作会议",cat:"重要会议"},
+  {id:25,en:"G20 Summit",cn:"二十国集团峰会",cat:"国际会议"},
+  {id:26,en:"APEC Economic Leaders' Meeting",cn:"亚太经合组织领导人非正式会议",cat:"国际会议"},
+  {id:27,en:"Shanghai Cooperation Organisation (SCO) Summit",cn:"上海合作组织峰会",cat:"国际会议"},
+  {id:28,en:"BRICS Summit",cn:"金砖国家领导人峰会",cat:"国际会议"},
+  {id:29,en:"Forum on China-Africa Cooperation (FOCAC)",cn:"中非合作论坛",cat:"国际会议"},
+  {id:30,en:"Boao Forum for Asia",cn:"博鳌亚洲论坛",cat:"国际论坛"},
+  {id:31,en:"World Economic Forum (WEF / Davos Forum)",cn:"世界经济论坛（达沃斯论坛）",cat:"国际论坛"},
+  // 重要政策理念
+  {id:32,en:"the Chinese Dream",cn:"中国梦",cat:"政治理念"},
+  {id:33,en:"the Two Centenary Goals",cn:"两个一百年奋斗目标",cat:"政治理念"},
+  {id:34,en:"moderately prosperous society in all respects",cn:"全面建成小康社会",cat:"政治理念"},
+  {id:35,en:"the Four Comprehensives",cn:"四个全面",cat:"政治理念"},
+  {id:36,en:"the Five Development Concepts",cn:"五大发展理念（创新/协调/绿色/开放/共享）",cat:"政治理念"},
+  {id:37,en:"new development pattern",cn:"新发展格局（以国内大循环为主体）",cat:"经济政策"},
+  {id:38,en:"high-quality development",cn:"高质量发展",cat:"经济政策"},
+  {id:39,en:"new quality productive forces",cn:"新质生产力",cat:"经济政策"},
+  {id:40,en:"one country, two systems",cn:"一国两制",cat:"政治制度"},
+  {id:41,en:"Hong Kong Special Administrative Region (HKSAR)",cn:"香港特别行政区",cat:"行政区划"},
+  {id:42,en:"Macao Special Administrative Region",cn:"澳门特别行政区",cat:"行政区划"},
+  // 国际组织
+  {id:43,en:"United Nations (UN)",cn:"联合国",cat:"国际组织"},
+  {id:44,en:"World Trade Organization (WTO)",cn:"世界贸易组织",cat:"国际组织"},
+  {id:45,en:"International Monetary Fund (IMF)",cn:"国际货币基金组织",cat:"国际组织"},
+  {id:46,en:"World Bank (WB)",cn:"世界银行",cat:"国际组织"},
+  {id:47,en:"World Health Organization (WHO)",cn:"世界卫生组织",cat:"国际组织"},
+  {id:48,en:"Association of Southeast Asian Nations (ASEAN)",cn:"东南亚国家联盟（东盟）",cat:"国际组织"},
+  {id:49,en:"European Union (EU)",cn:"欧洲联盟（欧盟）",cat:"国际组织"},
+  {id:50,en:"African Union (AU)",cn:"非洲联盟（非盟）",cat:"国际组织"},
+  {id:51,en:"United Nations Framework Convention on Climate Change (UNFCCC)",cn:"联合国气候变化框架公约",cat:"国际条约"},
+  {id:52,en:"Paris Agreement",cn:"巴黎协定",cat:"国际条约"},
+];
+
+// 练习题库（升级版，含完整解析）
+const QB={
+  2:[
+    {t:"hanyi",q:"【汉译英】\n“中国坚持走和平发展道路，推动构建人类命运共同体。”",
+     o:["China adheres to the path of peaceful development and works to build a community with a shared future for mankind.",
+        "China insists on peaceful development road and pushes building human destiny community.",
+        "China sticks to peaceful development and promotes human community of shared future.",
+        "China follows the peaceful road and builds the community for human destiny."],
+     a:0,
+     analysis:{
+       struct:"主语(China)+谓语(adheres to)+宾语(path...)，并列谓语(works to build)+宾语(community...)",
+       technique:"政治文本处理法：使用官方标准译法；adhere to比insist on更正式；community with a shared future for mankind是固定官方译法",
+       vocab:[{w:"坚持",t:"adhere to（政治文体首选）"},{w:"构建",t:"build（官方用词，非construct）"},{w:"人类命运共同体",t:"community with a shared future for mankind（官方固定译法）"}],
+       best:"China adheres to the path of peaceful development and works to build a community with a shared future for mankind.",
+       alts:["China remains committed to peaceful development and is dedicated to building a community with a shared future for mankind."],
+       note:"此题考查政治类官方术语掌握程度，整句为新华社/人民日报标准表达，须整体记忆"
+     }},
+    {t:"vocab",q:"选择最合适的词填入空白：\nThe government has taken measures to _____ the economic downturn.",
+     o:["alleviate","alienate","alternate","allocate"],
+     a:0,
+     analysis:{
+       struct:"take measures to do sth=采取措施做某事，to后接动词原形",
+       technique:"词汇辨析法：区分形近/音近词，根据语义语境判断",
+       vocab:[{w:"alleviate",t:"缓解（痛苦/困难）"},{w:"alienate",t:"疏远（人）"},{w:"alternate",t:"交替/轮流"},{w:"allocate",t:"分配（资源）"}],
+       best:"alleviate — 缓解经济下滑",
+       alts:["mitigate（缓和）也可以，但alleviate更口语化，mitigate更书面"],
+       note:"经济类高频词：alleviate poverty（扶贫）、alleviate pressure（缓解压力）—— 固定搭配"
+     }},
+    {t:"yihan",q:"【英译汉】\n\"China's economy has demonstrated remarkable resilience in the face of global headwinds, with GDP growth exceeding market expectations for the third consecutive quarter.\"",
+     o:["面对全球逆风，中国经济展现出卓越韧性，GDP增长连续第三季度超出市场预期。",
+        "中国经济面对全球阻力有了显著弹力，GDP增长三个连续季度超过市场期望。",
+        "在全球风险面前，中国经济表现出了明显的韧性，连续第三个季度增速超预期。",
+        "中国的经济在全球逆境下显示了不起的弹性，GDP三个季度连续超过预期。"],
+     a:0,
+     analysis:{
+       struct:"主语(economy)+谓语(demonstrated)+宾语(resilience)，介词短语(in the face of...)，with分词独立结构",
+       technique:"英译汉技巧：①with引导的独立结构译为分句；②注意专业词汇的准确对应；③保持中文表达流畅不翻译腔",
+       vocab:[{w:"resilience",t:"韧性（非弹性elasticity）"},{w:"headwinds",t:"逆风/不利因素（比obstacles更隐喻）"},{w:"consecutive",t:"连续的（强调不间断）"}],
+       best:"面对全球逆风，中国经济展现出卓越韧性，GDP增长连续第三季度超出市场预期。",
+       alts:["在全球逆境面前，中国经济展现了强劲韧性，GDP增速已连续三个季度超出市场预期。"],
+       note:"经济新闻高频句式，关键词：韧性≠弹性，逆风=不利因素，连续X季度=consecutive X quarters"
+     }},
+    {t:"term",q:"\"供给侧结构性改革\" 的标准英译是：",
+     o:["supply-side structural reform","supply structural reform","providing-side structure reform","supply chain structural transformation"],
+     a:0,
+     analysis:{
+       struct:"supply-side（供给侧，合成形容词）+ structural（结构性）+ reform（改革）",
+       technique:"专业术语处理：政经类术语以官方发布为准，不可自译；合成形容词用连字符",
+       vocab:[{w:"supply-side",t:"供给侧（注意连字符）"},{w:"structural",t:"结构性的（非structure）"}],
+       best:"supply-side structural reform",
+       alts:["无备选，此为官方唯一标准译法"],
+       note:"三去一降一补系列词汇：cutting overcapacity（去产能）、destocking（去库存）、deleveraging（去杠杆）、debt reduction（降成本）、补短板(strengthening weak links)"
+     }},
+    {t:"grammar",q:"下列句子语法正确的是：",
+     o:["Not only did he finish the work, but also he helped others.",
+        "Not only he finished the work, but also helped others.",
+        "Not only did he finish the work, but he also helped others.",
+        "Not only finished he the work, but also he helped others."],
+     a:2,
+     analysis:{
+       struct:"Not only...but also...句型：否定副词位于句首引起主句倒装，but后主句不倒装",
+       technique:"语法分析：倒装句型识别 → Not only/Never/Rarely/Hardly/Seldom位于句首均引起倒装",
+       vocab:[{w:"Not only...but also",t:"不仅...而且... —— 注意两部分结构对称"}],
+       best:"Not only did he finish the work, but he also helped others.",
+       alts:["He not only finished the work but also helped others.（无倒装版本，也正确）"],
+       note:"关键：but后第二个分句中also紧跟主语he，不触发倒装。考试常考陷阱"
+     }},
+    {t:"hanyi",q:"【汉译英】\n“近年来，中国积极推动绿色低碳转型，大力发展可再生能源，为全球应对气候变化作出了重要贡献。”",
+     o:["In recent years, China has actively promoted green and low-carbon transition, vigorously developed renewable energy, and made significant contributions to global efforts to combat climate change.",
+        "China recently actively pushed green low-carbon transformation, developed renewable energy strongly, and made important contributions to global climate change.",
+        "In recent years, China promoting green low-carbon transition and developing renewable energy has made great contributions to deal with climate change globally.",
+        "Recently, China has pushed green development and low-carbon shift, strongly developing renewable energies, contributing importantly to global climate response."],
+     a:0,
+     analysis:{
+       struct:"时间状语(In recent years)+主语(China)+三个并列谓语(promoted...developed...made...)",
+       technique:"分析汉语句子结构，识别三个并列谓语 → 英语用and连接三个动词短语；注意：已完成动作用现在完成时",
+       vocab:[{w:"绿色低碳转型",t:"green and low-carbon transition"},{w:"可再生能源",t:"renewable energy（不加s）"},{w:"应对气候变化",t:"combat/address climate change"}],
+       best:"In recent years, China has actively promoted green and low-carbon transition, vigorously developed renewable energy, and made significant contributions to global efforts to combat climate change.",
+       alts:["Over recent years, China has proactively advanced its green and low-carbon transition, expanded renewable energy capacity, and contributed significantly to the global fight against climate change."],
+       note:"环境类高频句式，combat/address/tackle climate change均可，significant比important更书面"
+     }},
+  ],
+  3:[
+    {t:"hanyi",q:"【汉译英】\n“保护环境是每个公民的责任。”",
+     o:["Protecting the environment is the responsibility of every citizen.",
+        "To protect environment is every citizen's responsible.",
+        "Protect the environment is responsibility of each citizens.",
+        "The protection of environment is responsible for every citizen."],
+     a:0,
+     analysis:{
+       struct:"主语(Protecting...动名词)+谓语(is)+表语(responsibility of...)",
+       technique:"汉语主语省略情况下，英语需补充主语；动名词作主语比不定式更常见",
+       vocab:[{w:"保护环境",t:"protecting the environment（动名词）"},{w:"责任",t:"responsibility（名词），responsible是形容词"}],
+       best:"Protecting the environment is the responsibility of every citizen.",
+       alts:["It is the duty of every citizen to protect the environment."],
+       note:"It is the duty/responsibility of sb. to do sth. 是地道英语句式，两种写法均正确"
+     }},
+    {t:"vocab",q:"选择最合适的词：\nThe scientist made a great _____ to the field of medicine.",
+     o:["contribution","attribution","distribution","solution"],
+     a:0,
+     analysis:{
+       struct:"make a...contribution to=对...作出...贡献，固定搭配",
+       technique:"词汇辨析：注意contribution/attribution/distribution/solution词根和语义差异",
+       vocab:[{w:"contribution",t:"贡献（make a contribution to）"},{w:"attribution",t:"归因（attribute to）"},{w:"distribution",t:"分配/分布"},{w:"solution",t:"解决方案（solution to a problem）"}],
+       best:"contribution",
+       alts:["无近似选项"],
+       note:"make contributions to是高频固定搭配，to后接领域/事业/人物等"
+     }},
+    {t:"yihan",q:"【英译汉】\n\"The rapid development of artificial intelligence has brought both opportunities and challenges to various industries.\"",
+     o:["人工智能的快速发展给各行各业带来了机遇与挑战。",
+        "快速发展的人工智能带来了机会和挑战给各种工业。",
+        "人工智能快速地发展给各行业带来了很多机遇也带来了挑战。",
+        "AI的快速发展对各行各业都带来了机遇和挑战两种。"],
+     a:0,
+     analysis:{
+       struct:"主语(development of AI)+谓语(has brought)+双宾语(opportunities and challenges)+间接宾语(to...industries)",
+       technique:"英译汉：把英语的间接宾语（to various industries）前置，转化为汉语的受益对象；both...and译为机遇与挑战（不是\"两者\"）",
+       vocab:[{w:"various industries",t:"各行各业（地道中文，非\"各种工业\"）"},{w:"both...and",t:"机遇与挑战（固定中文表达）"}],
+       best:"人工智能的快速发展给各行各业带来了机遇与挑战。",
+       alts:["人工智能的快速发展为各行业带来了发展机遇，同时也带来了新的挑战。"],
+       note:"\"各行各业\"是various industries的地道译法；brought...opportunities and challenges是英语固定表达"
+     }},
+    {t:"grammar",q:"选出语法正确的句子：",
+     o:["If I would have more time, I would learn painting.",
+        "If I had more time, I would learn painting.",
+        "If I have more time, I will learn painting.",
+        "If I had more time, I will learn painting."],
+     a:1,
+     analysis:{
+       struct:"与现在事实相反的虚拟语气：If+从句(过去式)+主句(would/could/should+动词原形)",
+       technique:"虚拟语气识别：看语境——是否是与现实相反的假设？现在虚拟用过去式had；未来虚拟用were to",
+       vocab:[{w:"If I had...I would",t:"与现在相反的虚拟语气（标准公式）"},{w:"If I have...I will",t:"真实条件句（实际上可能发生）"}],
+       best:"If I had more time, I would learn painting.",
+       alts:["C选项(If I have...will)也正确，但表达的是真实条件而非虚拟"],
+       note:"虚拟语气三种：①与现在相反 If+过去式 ②与过去相反 If+had done ③与将来相反 If+were to"
+     }},
+    {t:"term",q:"\"可持续发展\" 的标准英译是：",
+     o:["sustainable development","sustainable growth","perpetual development","lasting development"],
+     a:0,
+     analysis:{
+       struct:"sustainable（可持续的，形容词）+ development（发展，名词）",
+       technique:"专业术语：国际通用固定术语须准确记忆，不可自译",
+       vocab:[{w:"sustainable",t:"可持续的（能够长期维持而不耗尽资源）"},{w:"perpetual",t:"永久的/永恒的（强调不停止）"},{w:"lasting",t:"持久的（强调时间长）"}],
+       best:"sustainable development",
+       alts:["无备选，此为国际标准术语"],
+       note:"1987年布伦特兰报告定义：meeting the needs of the present without compromising the ability of future generations to meet their own needs（满足当代人需求而不损害后代人满足其需求的能力）"
+     }},
+  ]
+};
+
+
+/* ================================================================
+   STATE & STORAGE
+   ================================================================ */
+const AK='catti_pro_v1';
+let CU=null,CLV=2,CTAB='today',CEF='all',SCAT='vocab',VNI=null;
+let QI=0,QA=false,QMode='learn'; // learn | test
+let VFilter='all',VMode='list',VFlipIdx=0,VFlipSide=false;
+let ColFilter='all',TechFilter='all',PNFilter='all';
+let PNMode='cn2en'; // cn2en | en2cn
+let PNTestIdx=0,PNTestAns=null;
+
+function allU(){try{return JSON.parse(localStorage.getItem(AK+'_u')||'{}')}catch{return{}}}
+function saveU(u){localStorage.setItem(AK+'_u',JSON.stringify(u))}
+function getUD(){const u=allU();return u[CU]?.data||{r2:[],e2:[],r3:[],e3:[],vm:{},qstat:{correct:0,total:0},pnstat:{}}}
+function setUD(d){const u=allU();if(!u[CU])return;u[CU].data=d;saveU(u)}
+function getRec(){return getUD()[`r${CLV}`]||[]}
+function getErr(){return getUD()[`e${CLV}`]||[]}
+function saveRec(r){const d=getUD();d[`r${CLV}`]=r;setUD(d);sync('ok')}
+function saveErr(e){const d=getUD();d[`e${CLV}`]=e;setUD(d);sync('ok')}
+function getVMast(){return getUD().vm||{}}
+function setVMast(vm){const d=getUD();d.vm=vm;setUD(d)}
+function getQStat(){return getUD().qstat||{correct:0,total:0,byType:{}}}
+function setQStat(s){const d=getUD();d.qstat=s;setUD(d)}
+function getPNStat(){return getUD().pnstat||{}}
+function setPNStat(s){const d=getUD();d.pnstat=s;setUD(d)}
+
+function hp(p){let h=0;for(let i=0;i<p.length;i++)h=(Math.imul(31,h)+p.charCodeAt(i))|0;return h.toString(36)+'_'+p.length+'_'+btoa(p.split('').reverse().join('')).slice(0,8)}
+
+/* ================================================================
+   AUTH
+   ================================================================ */
+function showATab(t){
+  document.getElementById('pl').style.display=t==='login'?'block':'none';
+  document.getElementById('pr2').style.display=t==='reg'?'block':'none';
+  document.getElementById('at1').className='atab'+(t==='login'?' on':'');
+  document.getElementById('at2').className='atab'+(t==='reg'?' on':'');
+}
+function doLogin(){
+  const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
+  const m=document.getElementById('lm');
+  if(!u||!p){msg(m,'请填写账号和密码','var(--red)');return}
+  const us=allU();
+  if(!us[u]){msg(m,'账号不存在，请先注册','var(--red)');return}
+  if(us[u].pass!==hp(p)){msg(m,'密码错误','var(--red)');return}
+  msg(m,'登录成功 ✓','var(--green)');
+  setTimeout(()=>enterApp(u),500);
+}
+function doReg(){
+  const u=document.getElementById('ru').value.trim(),p=document.getElementById('rp').value,p2=document.getElementById('rp2').value;
+  const m=document.getElementById('rm');
+  if(!u){msg(m,'请填写用户名','var(--red)');return}
+  if(!/^[a-zA-Z0-9_\u4e00-\u9fa5]{2,20}$/.test(u)){msg(m,'用户名2-20位','var(--red)');return}
+  if(p.length<6){msg(m,'密码至少6位','var(--red)');return}
+  if(p!==p2){msg(m,'两次密码不一致','var(--red)');return}
+  const us=allU();
+  if(us[u]){msg(m,'该用户名已存在','var(--red)');return}
+  us[u]={pass:hp(p),at:Date.now(),data:{r2:[],e2:[],r3:[],e3:[],vm:{},qstat:{correct:0,total:0,byType:{}},pnstat:{}}};
+  saveU(us);msg(m,'注册成功，正在进入...','var(--green)');
+  setTimeout(()=>enterApp(u),600);
+}
+function logout(){
+  try{sessionStorage.removeItem(AK+'_s')}catch{}
+  CU=null;
+  document.getElementById('app').className='';
+  document.getElementById('auth').style.display='flex';
+  ['lu','lp'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('lm').textContent='';
+}
+function enterApp(u){
+  CU=u;
+  try{sessionStorage.setItem(AK+'_s',JSON.stringify({u}))}catch{}
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').className='show';
+  document.getElementById('un').textContent=u;
+  document.getElementById('uav').textContent=u.charAt(0).toUpperCase();
+  switchLv(2);sync('ok');
+}
+function msg(el,t,c){el.textContent=t;el.style.color=c}
+
+/* ================================================================
+   NETWORK & SYNC
+   ================================================================ */
+function updateNet(){
+  const on=navigator.onLine;
+  document.getElementById('nd').className='ndot '+(on?'on':'off');
+  document.getElementById('nt').textContent=on?'在线':'离线';
+}
+window.addEventListener('online',updateNet);
+window.addEventListener('offline',updateNet);
+function sync(s){
+  const d=document.getElementById('sd'),t=document.getElementById('st');
+  if(!d)return;
+  if(s==='saving'){d.className='dot2 dsav';t.textContent='同步中...'}
+  else{d.className='dot2 dok';t.textContent='已同步'}
+}
+
+/* ================================================================
+   LEVEL & TABS
+   ================================================================ */
+function switchLv(lv){
+  CLV=lv;CTAB='today';VNI=null;CEF='all';QI=0;QA=false;
+  document.getElementById('lb2').className='lv'+(lv===2?' a2':'');
+  document.getElementById('lb3').className='lv'+(lv===3?' a3':'');
+  const LV={2:{name:'二级笔译',ed:'2026.06.27'},3:{name:'三级笔译',ed:'2026下半年'}};
+  document.getElementById('ei').textContent='考试日 '+LV[lv].ed;
+  rNav();render();
+}
+
+const TABS=[
+  {id:'today',lb:'今日录入'},
+  {id:'errors',lb:'错题笔记'},
+  {id:'bank',lb:'练习题库'},
+  {id:'vocab',lb:'📚 词汇库',cls:'kb'},
+  {id:'coll',lb:'🔗 固定搭配',cls:'kb'},
+  {id:'tech',lb:'⚙️ 翻译技巧',cls:'kb'},
+  {id:'pn',lb:'🏛️ 专名词典',cls:'pn'},
+  {id:'stats',lb:'成绩分析'},
+  {id:'curve',lb:'进步曲线'},
+  {id:'review',lb:'每日复盘'},
+  {id:'guide',lb:'备考指南'},
+];
+
+function rNav(){
+  const errs=getErr();
+  document.getElementById('nav').innerHTML=TABS.map(t=>{
+    let lb=t.lb;
+    if(t.id==='errors'&&errs.length>0) lb+=`(${errs.length})`;
+    return `<button class="nt${CTAB===t.id?' on':''}${t.cls?' '+t.cls:''}" onclick="setTab('${t.id}')">${lb}</button>`;
+  }).join('');
+}
+function setTab(t){CTAB=t;VNI=null;rNav();render()}
+
+/* ================================================================
+   TAG HELPERS
+   ================================================================ */
+const TAG_STYLES={
+  '专八':'t-8','考研':'t-k','三笔':'t-3b','二笔':'t-2b','一笔':'t-1b',
+  '三口':'t-3k','二口':'t-2k','一口':'t-1k'
+};
+function renderTags(tags){
+  return tags.map(t=>`<span class="tag ${TAG_STYLES[t]||'tcat'}">${t}</span>`).join('');
+}
+function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+/* ================================================================
+   UTILS
+   ================================================================ */
+function ta(a){const v=a.filter(x=>x!=null);if(!v.length)return null;if(v.length<=2)return+(v.reduce((s,x)=>s+x,0)/v.length).toFixed(1);const s=[...v].sort((a,b)=>a-b).slice(1,-1);return+(s.reduce((x,y)=>x+y,0)/s.length).toFixed(1)}
+const LV_DATA={
+  2:{pm:[[88,95],[83,85],[78,70],[73,52],[68,35],[63,18],[60,10]],
+     diff:[{y:'22上',d:72},{y:'22下',d:75},{y:'23上',d:74},{y:'23下',d:78},{y:'24上',d:77},{y:'24下',d:82},{y:'25上',d:79},{y:'26预',d:81}],
+     guide:[
+       {t:'⏱ 三阶段备考计划',c:'var(--cyan)',i:['现在-3月底 | 唤醒期：每天30-45分钟，摸底真题+保持语感','4月-5月中 | 攻坚期：每天1.5小时，综合30分+实务1小时','5月中-6月 | 冲刺期：每周全真模考，严格卡时间']},
+       {t:'📚 核心训练动作',c:'var(--yellow)',i:['汉译英：每天200-300字，用政府工作报告双语版','英译汉：每天400-600词，检查中文流畅度，避免翻译腔','综合能力：刷近5年真题，错词进词汇库','机考打字：WPS练习，速度目标≥45字/分钟']},
+       {t:'⚠️ 关键注意',c:'var(--red)',i:['两科同一次全部≥60，一科未过全部作废','冲刺目标≥75，给评分误差留容错','报名预计4月初，关注山东省人事考试网']},
+     ]},
+  3:{pm:[[85,92],[80,82],[75,68],[70,50],[65,33],[60,15]],
+     diff:[{y:'22上',d:58},{y:'22下',d:60},{y:'23上',d:62},{y:'23下',d:65},{y:'24上',d:63},{y:'24下',d:67},{y:'25上',d:64},{y:'26预',d:66}],
+     guide:[
+       {t:'⏱ 备考节奏',c:'var(--green)',i:['第1个月 | 基础期：每天30分钟，熟悉题型','第2-3月 | 强化：每天1小时，重点练汉译英','考前1月 | 冲刺：全真模考+集中复习错题']},
+       {t:'📌 三笔 vs 二笔',c:'var(--indigo)',i:['三笔综合≈考研英语，二笔≈专八+GRE','有专八可直接冲二笔，性价比更高','三笔可作过渡，尽快冲二笔']},
+     ]}
+};
+function pr(avg,lv){if(avg==null)return null;for(const[t,r]of LV_DATA[lv||CLV].pm)if(avg>=t)return r;return 4}
+function sc(s){if(s==null)return'var(--muted)';return s>=75?'var(--green)':s>=60?'var(--yellow)':'var(--red)'}
+function td(){return new Date().toLocaleDateString('zh-CN',{month:'2-digit',day:'2-digit'})}
+
+/* ================================================================
+   AUTO NOTE (错题)
+   ================================================================ */
+function autoNote(cat,w,c){
+  const m={
+    vocab:`【词汇辨析笔记】\n❌ 错误/模糊：${w}\n✅ 正确表达：${c}\n\n📌 辨析要点\n• 注意该词在正式文体中的使用语境\n• 区分近义词的情感色彩与搭配习惯\n• 联系政府工作报告标准表达记忆\n\n🔗 相关固定搭配\n请在「固定搭配」模块搜索相关词组\n\n🔁 复习建议\n加入词卡，下次练习主动造句使用`,
+    grammar:`【语法结构笔记】\n❌ 问题句型：${w}\n✅ 修正后：${c}\n\n📌 语法要点\n• 分析主谓宾，理清句子结构\n• 英重形合（靠连接词），中重意合（靠语义）\n• 长难句：先找主句主谓，再处理从句\n\n⚙️ 相关技巧\n参见「翻译技巧」→ 转换法/拆句法\n\n🔁 复习建议\n同类句型再练3遍，形成语感`,
+    hanyi:`【汉译英表达笔记】\n❌ 我的译文：${w}\n✅ 参考译文：${c}\n\n📌 翻译要点\n• 避免逐字翻译，注意英文逻辑\n• 正式文体使用高级词汇\n• 注意时态语态转换\n\n⚙️ 相关技巧\n参见「翻译技巧」→ 政治文本处理 / 增译法\n\n🔁 复习建议\n背诵核心句式，下次练习直接套用`,
+    yihan:`【英译汉理解笔记】\n❌ 问题/原句：${w}\n✅ 正确理解：${c}\n\n📌 翻译要点\n• 先通读全段把握大意，再逐句精译\n• 专业词汇须准确，不可望文生义\n• 检查：读给母语者听，是否自然\n\n🏛️ 相关专名\n参见「专名词典」查找相关术语\n\n🔁 复习建议\n对照双语文本反复阅读`,
+    term:`【专业术语笔记】\n❌ 错误译法：${w}\n✅ 标准译法：${c}\n\n📌 术语要点\n• 政经类以新华社/官方为准\n• 建立个人术语词典，按领域分类\n\n🏛️ 扩展\n参见「专名词典」查找同类术语\n\n🔁 复习建议\n本周内使用该术语3次`,
+    style:`【文体风格笔记】\n❌ 问题表达：${w}\n✅ 规范表达：${c}\n\n📌 文体要点\n• 笔译以正式书面语为主\n• 政论：措辞庄重、逻辑严密\n• 新闻：简洁客观、时态准确\n\n⚙️ 相关技巧\n参见「翻译技巧」→ 政治文本处理\n\n🔁 复习建议\n精读5篇同类型参考译文`,
+  };
+  return m[cat]||`【备注】\n错误：${w}\n修正：${c}`;
+}
+
+/* ================================================================
+   RENDER
+   ================================================================ */
+function render(){
+  const lv=LV_DATA[CLV],recs=getRec(),errs=getErr();
+  const aH=recs.map(r=>r.h).filter(v=>v!=null),aY=recs.map(r=>r.y).filter(v=>v!=null),aZ=recs.map(r=>r.z).filter(v=>v!=null);
+  const avgH=ta(aH),avgY=ta(aY),avgZ=ta(aZ);
+  const avgSW=ta([...aH,...aY]);
+  const ovr=avgSW!=null&&avgZ!=null?+((avgSW*.7+avgZ*.3)).toFixed(1):(avgSW??avgZ);
+  const PR=pr(ovr);const last=recs[recs.length-1];
+  const vm=getVMast();const qs=getQStat();
+  let html='';
+  html+=`<div class="dlbar"><span style="font-size:11px;color:var(--muted2)">💾 数据存在本设备 · 换设备前请导出备份</span><button class="dlbtn" onclick="exportData()">导出备份</button></div>`;
+
+  /* ─── TODAY ─── */
+  if(CTAB==='today'){
+    const lc={2:{color:'var(--cyan)',sub:'全国通过率约8-12%'},3:{color:'var(--green)',sub:'难度≈考研英语'}};
+    html+=`<div class="card">
+      <div class="ct" style="color:${lc[CLV].color}">▸ 录入今日练习</div>
+      <div class="g2" style="margin-bottom:11px">
+        <div><label class="lb">第几天 *</label><input class="ai" type="number" id="fD" placeholder="如：1" min="1"/></div>
+        <div><label class="lb">汉译英得分</label><input class="ai" type="number" id="fH" placeholder="0-100 留空=未练"/></div>
+        <div><label class="lb">英译汉得分</label><input class="ai" type="number" id="fY" placeholder="0-100 留空=未练"/></div>
+        <div><label class="lb">综合能力得分</label><input class="ai" type="number" id="fZ" placeholder="0-100 留空=未练"/></div>
+      </div>
+      <label class="lb">今日笔记</label>
+      <textarea class="ai ta" id="fN" style="margin-bottom:11px" placeholder="卡在哪、有什么心得..."></textarea>
+      <button class="btn bc" onclick="saveScore()" id="saveBtn">▶ 保存今日记录</button>
+    </div>`;
+    if(ovr!=null){
+      const pc=PR>=65?'var(--green)':PR>=40?'var(--yellow)':'var(--red)';
+      html+=`<div class="card">
+        <div class="pr"><span class="mu">▸ 预估通过率（去高低均值）</span>
+          <span style="font-size:24px;font-weight:700;color:${pc};font-family:var(--mono)">${PR}%</span></div>
+        <div class="pb"><div class="pf" style="width:${PR}%;background:${pc}"></div></div>
+        <div class="sr">${[['汉译英',avgH],['英译汉',avgY],['综合能力',avgZ]].map(([l,a])=>`
+          <div class="sc"><div class="sn" style="color:${sc(a)}">${a??'--'}</div>
+            <div class="sl">${l}</div></div>`).join('')}
+        </div>
+        <div class="mu" style="text-align:center;margin-top:9px">共 ${recs.length} 天记录 · 已去高低均值</div>
+      </div>`;
+    }
+    // 今日学习提示
+    const mastCount=Object.values(vm).filter(v=>v).length;
+    html+=`<div class="card">
+      <div class="ct" style="color:var(--indigo)">▸ 今日学习建议</div>
+      <div style="font-size:13px;line-height:2;color:var(--text)">
+        📚 词汇已掌握 <strong style="color:var(--green)">${mastCount}</strong>/${VOCAB_DB.length} 个<br>
+        📝 题库已完成 <strong style="color:var(--yellow)">${qs.total||0}</strong> 题，正确率 <strong style="color:${(qs.total>0?(qs.correct/qs.total*100):0)>=70?'var(--green)':'var(--red)'}">${qs.total>0?Math.round(qs.correct/qs.total*100):0}%</strong><br>
+        🏛️ 建议今日背诵专名 5-10 个 → <button class="sm" onclick="setTab('pn')" style="margin-left:5px">去专名词典</button>
+      </div>
+    </div>`;
+  }
+
+  /* ─── ERRORS ─── */
+  else if(CTAB==='errors'){
+    const CATS=[{id:'vocab',lb:'词汇',ic:'📖'},{id:'grammar',lb:'语法',ic:'⚙️'},{id:'hanyi',lb:'汉译英',ic:'✍️'},{id:'yihan',lb:'英译汉',ic:'🔍'},{id:'term',lb:'术语',ic:'🏛️'},{id:'style',lb:'文体',ic:'🎨'}];
+    const cc=CATS.reduce((a,c)=>({...a,[c.id]:errs.filter(e=>e.c===c.id).length}),{});
+    html+=`<div class="card">
+      <div class="ct" style="color:var(--red)">▸ 添加新错题</div>
+      <div class="chips">${CATS.map(c=>`<button class="chip${c.id===SCAT?' on':''}" onclick="setScat('${c.id}')">${c.ic} ${c.lb}${cc[c.id]>0?` <span style="color:var(--red)">×${cc[c.id]}</span>`:''}</button>`).join('')}</div>
+      <div class="g2" style="margin-bottom:10px">
+        <div><label class="lb">我的错误/问题</label><textarea class="ai ta" id="eW" placeholder="错误写法或问题..."></textarea></div>
+        <div><label class="lb">正确/参考表达</label><textarea class="ai ta" id="eC" placeholder="正确答案或参考译文..."></textarea></div>
+      </div>
+      <label class="lb">来源（可选）</label>
+      <input class="ai" id="eS" placeholder="如：题库第3题 / 汉译英练习第5天" style="margin-bottom:10px"/>
+      <button class="btn br" onclick="saveErr2()" id="errBtn">▶ 保存 · 自动生成分析笔记</button>
+    </div>`;
+    if(errs.length>0){
+      const fl=CEF==='all'?errs:errs.filter(e=>e.c===CEF);
+      const CATS2=CATS;
+      html+=`<div class="chips"><button class="chip${CEF==='all'?' on':''}" onclick="setEF('all')">全部 (${errs.length})</button>${CATS2.filter(c=>cc[c.id]>0).map(c=>`<button class="chip${CEF===c.id?' on':''}" onclick="setEF('${c.id}')">${c.ic} ${c.lb} (${cc[c.id]})</button>`).join('')}</div>`;
+      fl.forEach(err=>{
+        const cat=CATS2.find(c=>c.id===err.c);const open=VNI===err.id;
+        html+=`<div class="en-card${err.done?' done':''}">
+          <div class="en-hdr">
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <span class="etag">${cat?.ic} ${cat?.lb}</span><span class="mu">${err.dt}</span>${err.src?`<span class="mu">· ${err.src}</span>`:''}
+            </div>
+            <div style="display:flex;gap:5px">
+              <button class="sm${err.done?' ok':''}" onclick="togDone(${err.id})">${err.done?'✓ 已掌握':'标记掌握'}</button>
+              <button class="sm dl" onclick="delE(${err.id})">✕</button>
+            </div>
+          </div>
+          <div class="ecols">
+            <div class="ecol"><div class="eclbl" style="color:var(--red)">❌ 错误/问题</div><div class="ectxt">${esc(err.w)}</div></div>
+            <div class="ecol"><div class="eclbl" style="color:var(--green)">✅ 正确/参考</div><div class="ectxt">${esc(err.cor)}</div></div>
+          </div>
+          <button class="btn bi" style="margin-bottom:${open?'9px':'0'}" onclick="togNote(${err.id})">${open?'▲ 收起笔记':'📖 查看自动生成的分析笔记'}</button>
+          ${open?`<div class="nbox"><pre class="npre">${esc(err.note)}</pre></div>`:''}
+        </div>`;
+      });
+    } else {
+      html+=`<div class="card" style="text-align:center;padding:48px;color:var(--muted)">还没有错题记录<br><span style="font-size:11px;display:block;margin-top:5px">填入错误后系统自动生成详细分析笔记</span></div>`;
+    }
+  }
+
+  /* ─── BANK ─── */
+  else if(CTAB==='bank'){
+    const qs2=QB[CLV]||[];
+    html+=`<div class="mode-sw">
+      <button class="ms-btn${QMode==='learn'?' on':''}" onclick="setQMode('learn')">📖 学习模式</button>
+      <button class="ms-btn${QMode==='test'?' on':''}" onclick="setQMode('test')">🎯 测试模式</button>
+    </div>`;
+    const qstat=getQStat();
+    html+=`<div style="display:flex;gap:8px;margin-bottom:11px">
+      <div class="sc" style="flex:1"><div class="sn" style="color:var(--yellow)">${qstat.total||0}</div><div class="sl">已完成</div></div>
+      <div class="sc" style="flex:1"><div class="sn" style="color:var(--green)">${qstat.correct||0}</div><div class="sl">答对</div></div>
+      <div class="sc" style="flex:1"><div class="sn" style="color:${qstat.total>0&&qstat.correct/qstat.total>=.7?'var(--green)':'var(--red)'}">${qstat.total>0?Math.round(qstat.correct/qstat.total*100):0}%</div><div class="sl">正确率</div></div>
+    </div>`;
+    if(!qs2.length){html+=`<div class="card" style="text-align:center;padding:40px;color:var(--muted)">题库建设中...</div>`}
+    else{
+      const q=qs2[QI%qs2.length];
+      const CATLABELS={vocab:'词汇辨析',grammar:'语法结构',hanyi:'汉译英',yihan:'英译汉',term:'专业术语',grammar2:'语法'};
+      html+=`<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span class="etag">${q.t==='vocab'?'📖 词汇辨析':q.t==='hanyi'?'✍️ 汉译英':q.t==='yihan'?'🔍 英译汉':q.t==='term'?'🏛️ 专业术语':'⚙️ 语法'}</span>
+          <span class="mu">第 ${QI%qs2.length+1} / ${qs2.length} 题</span>
+        </div>
+        <div class="qcard">
+          <div class="qtxt">${esc(q.q)}</div>
+          <div class="qopts">${q.o.map((opt,i)=>`<button class="qo" id="qo${i}" onclick="ansQ(${i},${q.a},${qs2.indexOf(q)})">${esc(opt)}</button>`).join('')}</div>
+          <div class="qexp" id="qex">
+            <div class="qexp-title">▸ 完整解析</div>
+            ${q.analysis?`
+            <div class="qexp-sect"><div class="qexp-sh">句型分析</div><div class="qexp-txt">${esc(q.analysis.struct)}</div></div>
+            <div class="qexp-sect"><div class="qexp-sh">翻译方法</div><div class="qexp-txt">${esc(q.analysis.technique)}</div></div>
+            <div class="qexp-sect"><div class="qexp-sh">关键词汇</div><div class="qexp-txt">${q.analysis.vocab.map(v=>`<span style="color:var(--cyan);">${esc(v.w)}</span> → ${esc(v.t)}`).join('<br>')}</div></div>
+            <div class="qexp-sect">
+              <div class="best-ans"><div style="font-size:10px;color:var(--green);font-family:var(--mono);margin-bottom:4px">★ 最佳译文/答案</div><div style="font-size:13px;line-height:1.8">${esc(q.analysis.best)}</div></div>
+              ${q.analysis.alts&&q.analysis.alts[0]?`<div class="alt-ans"><div style="font-size:10px;color:var(--indigo);font-family:var(--mono);margin-bottom:4px">◎ 备选译文</div><div style="font-size:13px;line-height:1.8">${esc(q.analysis.alts[0])}</div></div>`:''}
+            </div>
+            <div class="qexp-sect"><div class="qexp-sh">考点说明</div><div class="qexp-txt">${esc(q.analysis.note)}</div></div>
+            `:`<div class="qexp-txt">${esc(q.analysis?.note||'')}</div>`}
+          </div>
+        </div>
+        <div style="display:flex;gap:7px;margin-top:11px">
+          <button class="btn bc" onclick="nextQ()" style="flex:1">下一题 →</button>
+          <button class="btn br" style="width:auto;padding:9px 13px" onclick="addQErr('${q.t}','${encodeURIComponent(q.q)}','${encodeURIComponent(q.analysis?.best||q.o[q.a]||'')}')">＋ 加入错题</button>
+        </div>
+      </div>`;
+    }
+  }
+
+  /* ─── VOCAB ─── */
+  else if(CTAB==='vocab'){
+    const vm=getVMast();
+    const mastCount=Object.values(vm).filter(Boolean).length;
+    const ALL_TAGS=['专八','考研','三笔','二笔','一笔','三口','二口','一口'];
+    const filtered=VFilter==='all'?VOCAB_DB:VFilter==='mastered'?VOCAB_DB.filter(v=>vm[v.id]):VFilter==='unmastered'?VOCAB_DB.filter(v=>!vm[v.id]):VOCAB_DB.filter(v=>v.tags.includes(VFilter));
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--muted2);font-family:var(--mono)">已掌握 <strong style="color:var(--green)">${mastCount}</strong>/${VOCAB_DB.length}</div>
+      <div style="display:flex;gap:6px">
+        <button class="sm${VMode==='list'?' ok':''}" onclick="setVM('list')">列表</button>
+        <button class="sm${VMode==='flash'?' ok':''}" onclick="setVM('flash')">闪卡</button>
+      </div>
+    </div>
+    <div class="chips">
+      <button class="chip${VFilter==='all'?' on':''}" onclick="setVF('all')">全部 (${VOCAB_DB.length})</button>
+      ${ALL_TAGS.map(t=>{const c=VOCAB_DB.filter(v=>v.tags.includes(t)).length;return`<button class="chip${VFilter===t?' on':''}" onclick="setVF('${t}')">${t} (${c})</button>`}).join('')}
+      <button class="chip${VFilter==='mastered'?' on':''}" onclick="setVF('mastered')" style="${VFilter==='mastered'?'':'border-color:var(--green);color:var(--green);opacity:.7'}">✓ 已掌握</button>
+      <button class="chip${VFilter==='unmastered'?' on':''}" onclick="setVF('unmastered')" style="${VFilter==='unmastered'?'':'border-color:var(--red);color:var(--red);opacity:.7'}">未掌握</button>
+    </div>`;
+
+    if(VMode==='flash'&&filtered.length>0){
+      const idx=VFlipIdx%filtered.length;const v=filtered[idx];
+      html+=`<div class="flash-prog">闪卡 ${idx+1} / ${filtered.length} · 点击翻面</div>
+        <div class="flash-wrap" onclick="flipCard()">
+          <div class="flash-inner${VFlipSide?' flipped':''}">
+            <div class="flash-f">
+              <div class="flash-hint">中文 → 英文（点击翻面）</div>
+              <div class="flash-q">${esc(v.cn)}</div>
+              <div style="margin-top:8px">${renderTags(v.tags)}</div>
+            </div>
+            <div class="flash-b">
+              <div class="flash-hint">答案</div>
+              <div class="flash-a">${esc(v.en)}</div>
+              <div class="flash-mem">${esc(v.mem)}</div>
+            </div>
+          </div>
+        </div>
+        <div class="flash-nav">
+          <button class="btn br" style="flex:1" onclick="prevFlash()">← 上一个</button>
+          <button class="btn${vm[v.id]?' bg':' bc'}" style="flex:1" onclick="toggleVM(${v.id})">${vm[v.id]?'✓ 已掌握':'标记掌握'}</button>
+          <button class="btn bc" style="flex:1" onclick="nextFlash()">下一个 →</button>
+        </div>`;
+    } else {
+      html+=`<div class="vclist">`;
+      filtered.forEach(v=>{
+        html+=`<div class="vc${vm[v.id]?' mastered':''}">
+          <div class="vc-top">
+            <div>
+              <div class="vc-en">${esc(v.en)}</div>
+              <div class="vc-cn">${esc(v.cn)}</div>
+              <div style="margin-top:4px">${renderTags(v.tags)}<span class="tcat" style="margin-left:4px">${esc(v.cat)}</span></div>
+            </div>
+            <button class="sm${vm[v.id]?' ok':''}" onclick="toggleVM(${v.id})">${vm[v.id]?'✓ 已掌握':'标记'}</button>
+          </div>
+          <div class="vc-mem">💡 ${esc(v.mem)}</div>
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+  }
+
+  /* ─── COLLOCATIONS ─── */
+  else if(CTAB==='coll'){
+    const ALL_TAGS=['考研','专八','三笔','二笔','一笔','二口','一口'];
+    const filtered=ColFilter==='all'?COL_DB:COL_DB.filter(c=>c.tags.includes(ColFilter));
+    html+=`<div class="chips"><button class="chip${ColFilter==='all'?' on':''}" onclick="setCF('all')">全部 (${COL_DB.length})</button>${ALL_TAGS.map(t=>{const c=COL_DB.filter(v=>v.tags.includes(t)).length;return c>0?`<button class="chip${ColFilter===t?' on':''}" onclick="setCF('${t}')">${t} (${c})</button>`:''}).join('')}</div>`;
+    filtered.forEach(c=>{
+      html+=`<div class="col-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+          <div>
+            <div class="col-en">${esc(c.en)}</div>
+            <div class="col-cn">${esc(c.cn)}</div>
+          </div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">${renderTags(c.tags)}</div>
+        </div>
+        <div class="col-ex">
+          <div class="col-ex-en">${esc(c.ex)}</div>
+          <div class="col-ex-cn">${esc(c.exCn)}</div>
+        </div>
+        <div class="col-note">📌 ${esc(c.note)}</div>
+      </div>`;
+    });
+  }
+
+  /* ─── TECHNIQUES ─── */
+  else if(CTAB==='tech'){
+    const ALL_TAGS=['三笔','二笔','一笔','二口','一口'];
+    const filtered=TechFilter==='all'?TECH_DB:TECH_DB.filter(t=>t.tags.includes(TechFilter));
+    html+=`<div class="chips"><button class="chip${TechFilter==='all'?' on':''}" onclick="setTF('all')">全部技巧 (${TECH_DB.length})</button>${ALL_TAGS.map(t=>{const c=TECH_DB.filter(v=>v.tags.includes(t)).length;return c>0?`<button class="chip${TechFilter===t?' on':''}" onclick="setTF('${t}')">${t} (${c})</button>`:''}).join('')}</div>`;
+    filtered.forEach(t=>{
+      html+=`<div class="tech-card">
+        <div class="tech-name">${esc(t.name)}</div>
+        <div class="tech-en">${esc(t.en)} · ${renderTags(t.tags)}</div>
+        <div class="tech-desc">${esc(t.desc)}</div>
+        <div class="tech-ex">
+          <div class="t-src">原文（中文）</div>
+          <div class="t-cn">${esc(t.cn)}</div>
+          <div class="t-best"><div class="t-best-lbl">★ 最佳译文</div><div class="t-best-txt">${esc(t.best)}</div></div>
+          ${t.alt1?`<div class="t-alt"><div class="t-alt-lbl">◎ 备选译文</div><div class="t-alt-txt">${esc(t.alt1)}</div></div>`:''}
+          <div class="t-note">💡 ${esc(t.note)}</div>
+        </div>
+      </div>`;
+    });
+  }
+
+  /* ─── PROPER NOUNS ─── */
+  else if(CTAB==='pn'){
+    const ALL_CATS=[...new Set(PN_DB.map(p=>p.cat))];
+    const pnstat=getPNStat();
+    const mastPN=Object.values(pnstat).filter(Boolean).length;
+    const filtered=PNFilter==='all'?PN_DB:PN_DB.filter(p=>p.cat===PNFilter);
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--muted2);font-family:var(--mono)">已掌握 <strong style="color:var(--green)">${mastPN}</strong>/${PN_DB.length}</div>
+      <div style="display:flex;gap:6px">
+        <button class="sm${PNMode==='cn2en'?' ok':''}" onclick="setPNMode('cn2en')">中→英</button>
+        <button class="sm${PNMode==='en2cn'?' ok':''}" onclick="setPNMode('en2cn')">英→中</button>
+        <button class="sm${PNMode==='list'?' ok':''}" onclick="setPNMode('list')">对照表</button>
+      </div>
+    </div>
+    <div class="chips"><button class="chip${PNFilter==='all'?' on':''}" onclick="setPNF('all')">全部 (${PN_DB.length})</button>${ALL_CATS.map(c=>{const n=PN_DB.filter(p=>p.cat===c).length;return`<button class="chip${PNFilter===c?' on':''}" onclick="setPNF('${c}')">${c} (${n})</button>`}).join('')}</div>`;
+
+    if(PNMode==='list'){
+      filtered.forEach(p=>{
+        html+=`<div class="pn-card">
+          <div>
+            <div class="pn-cn">${esc(p.cn)}</div>
+            <div class="pn-en">${esc(p.en)}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="pn-cat-lbl">${esc(p.cat)}</div>
+            <button class="sm${pnstat[p.id]?' ok':''}" style="margin-top:4px" onclick="togglePN(${p.id})">${pnstat[p.id]?'✓':'背会了'}</button>
+          </div>
+        </div>`;
+      });
+    } else if(filtered.length>0){
+      const idx=PNTestIdx%filtered.length;const item=filtered[idx];
+      const isShowing=PNTestAns===idx;
+      html+=`<div class="flash-prog">测试 ${idx+1} / ${filtered.length} · ${mastPN}个已掌握</div>
+        <div class="card" style="text-align:center;padding:24px;min-height:140px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">${PNMode==='cn2en'?'中文 → 英文':'英文 → 中文'}</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text)">${PNMode==='cn2en'?esc(item.cn):esc(item.en)}</div>
+          ${isShowing?`<div style="font-size:14px;color:var(--cyan);font-family:var(--mono);text-align:center;margin-top:4px">${PNMode==='cn2en'?esc(item.en):esc(item.cn)}</div>`:`<button class="btn bc" style="width:auto;padding:7px 18px" onclick="showPNAns(${idx})">显示答案</button>`}
+        </div>
+        <div class="flash-nav" style="margin-top:0">
+          <button class="btn br" style="flex:1" onclick="prevPN()">← 上一个</button>
+          <button class="btn${pnstat[item.id]?' bg':' bc'}" style="flex:1" onclick="togglePN(${item.id})">${pnstat[item.id]?'✓ 已掌握':'标记掌握'}</button>
+          <button class="btn bc" style="flex:1" onclick="nextPN()">下一个 →</button>
+        </div>`;
+    }
+  }
+
+  /* ─── STATS ─── */
+  else if(CTAB==='stats'){
+    const vm=getVMast();const qs2=getQStat();const pns=getPNStat();
+    const mastV=Object.values(vm).filter(Boolean).length;
+    const mastPN=Object.values(pns).filter(Boolean).length;
+    const lv=LV_DATA[CLV];
+    html+=`<div class="card">
+      <div class="ct" style="color:${CLV===2?'var(--cyan)':'var(--green)'}">▸ 综合成绩分析</div>`;
+    if(!recs.length){html+=`<div style="color:var(--muted);text-align:center;padding:36px">录入成绩后显示分析</div>`}
+    else{
+      const pc=PR>=65?'var(--green)':PR>=40?'var(--yellow)':'var(--red)';
+      html+=`<div class="pr" style="margin-bottom:5px"><span class="mu">预估通过率</span>
+        <span style="font-size:22px;font-weight:700;color:${pc};font-family:var(--mono)">${PR}%</span></div>
+        <div class="pb" style="margin-bottom:14px"><div class="pf" style="width:${PR}%;background:${pc}"></div></div>
+        <div class="sr" style="margin-bottom:14px">${[['汉译英',avgH,aH],['英译汉',avgY,aY],['综合',avgZ,aZ]].map(([l,a,ar])=>`
+          <div class="sc"><div class="sn" style="color:${sc(a)}">${a??'--'}</div>
+            <div class="sl">${l}</div>
+            <div class="ss">高${ar.length?Math.max(...ar):'--'}·低${ar.length?Math.min(...ar):'--'}</div>
+          </div>`).join('')}
+        </div>
+        <div style="background:#040c18;border-radius:8px;padding:12px">
+          <div style="font-size:10px;color:var(--yellow);font-family:var(--mono);margin-bottom:10px;letter-spacing:1px">▸ 薄弱项排序</div>
+          ${[['汉译英',avgH],['英译汉',avgY],['综合能力',avgZ]].filter(([,a])=>a!=null).sort((a,b)=>a[1]-b[1]).map(([l,a])=>`
+          <div style="margin-bottom:8px"><div class="pr"><span style="font-size:12px">${l}</span>
+            <span style="font-size:12px;font-weight:700;color:${sc(a)};font-family:var(--mono)">${a}</span></div>
+            <div class="pb"><div class="pf" style="width:${a}%;background:${sc(a)}"></div></div>
+          </div>`).join('')}
+        </div>`;
+    }
+    html+=`</div>`;
+    // 学习统计
+    html+=`<div class="g2">
+      <div class="sc"><div class="sn" style="color:var(--green)">${mastV}</div><div class="sl">词汇已掌握</div><div class="ss">共${VOCAB_DB.length}个</div></div>
+      <div class="sc"><div class="sn" style="color:var(--cyan)">${mastPN}</div><div class="sl">专名已掌握</div><div class="ss">共${PN_DB.length}个</div></div>
+      <div class="sc"><div class="sn" style="color:var(--yellow)">${qs2.total||0}</div><div class="sl">题库已做</div><div class="ss">正确${qs2.correct||0}题</div></div>
+      <div class="sc"><div class="sn" style="color:${(qs2.total>0?qs2.correct/qs2.total*100:0)>=70?'var(--green)':'var(--red)'}">${qs2.total>0?Math.round(qs2.correct/qs2.total*100):0}%</div><div class="sl">题库正确率</div></div>
+    </div>`;
+    // 难度趋势
+    const diff=lv.diff,W=480,H=110;
+    const xs=i=>36+i*(W-52)/(diff.length-1);
+    const ys=d=>H-18-(d-50)/42*(H-40);
+    let si='';
+    diff.forEach((d,i)=>{
+      if(i>0){const p=diff[i-1];si+=`<line x1="${xs(i-1).toFixed(1)}" y1="${ys(p.d).toFixed(1)}" x2="${xs(i).toFixed(1)}" y2="${ys(d.d).toFixed(1)}" stroke="${CLV===2?'#00e5ff':'#34d399'}" stroke-width="1.5" opacity=".6"/>`}
+      const ip=d.y.includes('预');
+      si+=`<circle cx="${xs(i).toFixed(1)}" cy="${ys(d.d).toFixed(1)}" r="${ip?5:3}" fill="${ip?'#fb7185':CLV===2?'#00e5ff':'#34d399'}"/>
+        <text x="${xs(i).toFixed(1)}" y="${(ys(d.d)-7).toFixed(1)}" text-anchor="middle" fill="${ip?'#fb7185':CLV===2?'#00e5ff':'#34d399'}" font-size="9">${d.d}</text>
+        <text x="${xs(i).toFixed(1)}" y="${H-3}" text-anchor="middle" fill="#3d5a7a" font-size="8">${d.y}</text>`;
+    });
+    html+=`<div class="card"><div class="ct" style="color:var(--yellow)">▸ 历年难度趋势</div>
+      <div class="csc"><svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">${si}</svg></div>
+      <div style="font-size:11px;color:var(--red);margin-top:6px">🔴 ${CLV===2?'2026预测难度81，建议冲刺目标≥78':'三级难度稳定，有专八可直冲二笔'}</div>
+    </div>`;
+  }
+
+  /* ─── CURVE ─── */
+  else if(CTAB==='curve'){
+    html+=`<div class="card"><div class="ct" style="color:${CLV===2?'var(--cyan)':'var(--green)'}">▸ 进步曲线</div>`;
+    if(recs.length<2){html+=`<div style="color:var(--muted);text-align:center;padding:40px">录入2天以上后显示</div>`}
+    else{
+      const ds=recs.map(r=>r.d),mn=Math.min(...ds),mx=Math.max(...ds);
+      const W=480,H=160;
+      const xs=d=>38+(d-mn)/Math.max(mx-mn,1)*(W-58);
+      const ys=s=>H-20-(s-36)/66*(H-48);
+      let sv='';
+      [[60,'#fb7185'],[75,'#34d399']].forEach(([v,c])=>{
+        sv+=`<line x1="38" y1="${ys(v).toFixed(1)}" x2="${W-10}" y2="${ys(v).toFixed(1)}" stroke="${c}" stroke-width="1" stroke-dasharray="4,4" opacity=".3"/>
+          <text x="40" y="${(ys(v)-5).toFixed(1)}" fill="${c}" font-size="8" opacity=".5">${v===60?'及格':'目标'}</text>`;
+      });
+      [['h','#00e5ff'],['y','#818cf8'],['z','#fbbf24']].forEach(([key,col])=>{
+        const pts=recs.filter(r=>r[key]!=null);
+        if(pts.length<2)return;
+        const pd=pts.map((p,i)=>`${i===0?'M':'L'}${xs(p.d).toFixed(1)},${ys(p[key]).toFixed(1)}`).join(' ');
+        sv+=`<path d="${pd}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round"/>`;
+        pts.forEach(p=>{sv+=`<circle cx="${xs(p.d).toFixed(1)}" cy="${ys(p[key]).toFixed(1)}" r="3" fill="${col}" stroke="#020810" stroke-width="1.5"/>`});
+      });
+      recs.forEach(r=>{sv+=`<text x="${xs(r.d).toFixed(1)}" y="${H-4}" text-anchor="middle" fill="#3d5a7a" font-size="8">D${r.d}</text>`});
+      html+=`<div class="csc"><svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">${sv}</svg></div>
+        <div style="display:flex;gap:12px;margin-top:9px;font-size:11px;font-family:var(--mono)">
+          <span style="color:#00e5ff">● 汉译英</span><span style="color:#818cf8">● 英译汉</span><span style="color:#fbbf24">● 综合</span></div>`;
+    }
+    html+=`</div>`;
+    if(recs.length){
+      html+=`<div class="card"><div class="ct" style="color:var(--muted)">▸ 历史记录</div>
+        <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono)">
+          <thead><tr>${['天','日期','汉译英','英译汉','综合','笔记'].map(h=>`<th style="color:var(--muted);padding:6px;text-align:left;border-bottom:1px solid var(--b1)">${h}</th>`).join('')}</tr></thead>
+          <tbody>${recs.map(r=>`<tr>
+            <td style="padding:6px;color:${CLV===2?'var(--cyan)':'var(--green)'}">D${r.d}</td>
+            <td style="padding:6px;color:var(--muted)">${r.dt}</td>
+            ${['h','y','z'].map(k=>`<td style="padding:6px;color:${sc(r[k])};font-weight:700">${r[k]??'--'}</td>`).join('')}
+            <td style="padding:6px;color:var(--muted2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.n||'--'}</td>
+          </tr>`).join('')}</tbody>
+        </table></div></div>`;
+    }
+  }
+
+  /* ─── REVIEW ─── */
+  else if(CTAB==='review'){
+    html+=`<div class="card"><div class="ct" style="color:${CLV===2?'var(--cyan)':'var(--green)'}">▸ 每日自动复盘</div>`;
+    if(!last){html+=`<div style="color:var(--muted);text-align:center;padding:36px">录入成绩后自动生成</div>`}
+    else{
+      const h=last.h,y=last.y,z=last.z,items=[];
+      if(h!=null)items.push(h<60?`汉译英 ${h}分 ⚠️ 重点攻：句式重构+书面表达地道性`:h<72?`汉译英 ${h}分 · 加强：长句拆分、正式用词`:`汉译英 ${h}分 ✅`);
+      if(y!=null)items.push(y<60?`英译汉 ${y}分 ⚠️ 重点攻：理解逻辑+中文表达流畅`:y<72?`英译汉 ${y}分 · 加强：术语准确、语境还原`:`英译汉 ${y}分 ✅`);
+      if(z!=null)items.push(z<60?`综合 ${z}分 ⚠️ 大量刷真题，重攻词汇辨析`:z<72?`综合 ${z}分 · 加强：完形语境判断`:`综合 ${z}分 ✅`);
+      html+=`<div class="rb"><div class="rt" style="color:var(--yellow)">第 ${last.d} 天 · ${last.dt}</div>
+        <div class="rr">${items.length?items.join('<br>'):'今日无完整记录'}</div>
+        ${last.n?`<div style="margin-top:9px;padding:9px;background:rgba(0,229,255,.03);border-radius:6px;font-size:12px;color:var(--muted2);line-height:1.7">📌 ${esc(last.n)}</div>`:''}
+      </div>`;
+      const tips=[];
+      if(h!=null&&h<70)tips.push('• 汉译英：政府工作报告200字，限时20分钟，对照双语版标3处差距');
+      if(y!=null&&y<70)tips.push('• 英译汉：经济类英文400词，练中文流畅度，消除翻译腔');
+      if(z!=null&&z<70)tips.push('• 综合：刷10道词汇辨析，错的加入词汇库');
+      if(!tips.length)tips.push('• 今天表现不错，明天可提高材料难度');
+      tips.push(`• 词汇库背 ${Math.min(10,VOCAB_DB.length-Object.values(getVMast()).filter(Boolean).length)} 个新词`);
+      tips.push(`• 专名词典背 5 个新专名 → 当前已掌握${Object.values(getPNStat()).filter(Boolean).length}/${PN_DB.length}`);
+      html+=`<div class="rb"><div class="rt" style="color:var(--cyan)">▸ 明日行动建议</div><div class="rr">${tips.join('<br>')}</div></div>`;
+      const undone=errs.filter(e=>!e.done);
+      if(undone.length)html+=`<div class="rb" style="border:1px solid rgba(251,113,133,.15)">
+        <div class="rt" style="color:var(--red)">📌 未掌握错题 (${undone.length}条)</div>
+        <div class="rr">建议每日复习2-3条 · 点击「错题笔记」查看分析笔记</div></div>`;
+    }
+    html+=`</div>`;
+  }
+
+  /* ─── GUIDE ─── */
+  else if(CTAB==='guide'){
+    const lv=LV_DATA[CLV];
+    lv.guide.forEach(sec=>{
+      html+=`<div class="gs"><div class="ct" style="color:${sec.c}">${sec.t}</div>${sec.i.map(i=>`<div class="gi">${i}</div>`).join('')}</div>`;
+    });
+  }
+
+  document.getElementById('main').innerHTML=html;
+}
+
+/* ================================================================
+   HANDLERS
+   ================================================================ */
+function saveScore(){
+  const d=parseInt(document.getElementById('fD')?.value||'');
+  if(isNaN(d)||d<1){fl('saveBtn','请填写第几天','var(--red)');return}
+  const h=document.getElementById('fH')?.value,y=document.getElementById('fY')?.value,z=document.getElementById('fZ')?.value,n=document.getElementById('fN')?.value||'';
+  sync('saving');
+  saveRec([...getRec().filter(r=>r.d!==d),{d,dt:td(),h:h!==''&&h!=null?parseFloat(h):null,y:y!==''&&y!=null?parseFloat(y):null,z:z!==''&&z!=null?parseFloat(z):null,n}].sort((a,b)=>a.d-b.d));
+  fl('saveBtn','✓ 已保存','var(--green)');rNav();render();
+}
+function saveErr2(){
+  const w=document.getElementById('eW')?.value?.trim(),c=document.getElementById('eC')?.value?.trim();
+  if(!w||!c){fl('errBtn','请填写错误和正确表达','var(--red)');return}
+  const src=document.getElementById('eS')?.value||'';
+  sync('saving');
+  saveErr([{id:Date.now(),dt:td(),c:SCAT,w,cor:c,src,note:autoNote(SCAT,w,c),done:false},...getErr()]);
+  fl('errBtn','✓ 已生成笔记','var(--green)');rNav();render();
+}
+function togDone(id){saveErr(getErr().map(e=>e.id===id?{...e,done:!e.done}:e));render()}
+function delE(id){if(!confirm('确认删除？'))return;saveErr(getErr().filter(e=>e.id!==id));rNav();render()}
+function togNote(id){VNI=VNI===id?null:id;render()}
+function setScat(c){SCAT=c;render()}
+function setEF(f){CEF=f;render()}
+function setQMode(m){QMode=m;render()}
+function setVM(m){VMode=m;VFlipIdx=0;VFlipSide=false;render()}
+function setVF(f){VFilter=f;VFlipIdx=0;VFlipSide=false;render()}
+function setCF(f){ColFilter=f;render()}
+function setTF(f){TechFilter=f;render()}
+function setPNF(f){PNFilter=f;PNTestIdx=0;PNTestAns=null;render()}
+function setPNMode(m){PNMode=m;PNTestIdx=0;PNTestAns=null;render()}
+function showPNAns(i){PNTestAns=i;render()}
+function nextPN(){PNTestIdx++;PNTestAns=null;render()}
+function prevPN(){PNTestIdx=Math.max(0,PNTestIdx-1);PNTestAns=null;render()}
+function flipCard(){VFlipSide=!VFlipSide;const el=document.querySelector('.flash-inner');if(el){el.className='flash-inner'+(VFlipSide?' flipped':'');}}
+function nextFlash(){VFlipIdx++;VFlipSide=false;render()}
+function prevFlash(){VFlipIdx=Math.max(0,VFlipIdx-1);VFlipSide=false;render()}
+function toggleVM(id){const vm=getVMast();vm[id]=!vm[id];setVMast(vm);render()}
+function togglePN(id){const s=getPNStat();s[id]=!s[id];setPNStat(s);render()}
+function ansQ(chosen,correct,qidx){
+  if(QA)return;QA=true;
+  const qs2=QB[CLV]||[];
+  qs2[QI%qs2.length].o.forEach((_,i)=>{
+    const b=document.getElementById(`qo${i}`);if(!b)return;b.disabled=true;
+    if(i===correct)b.className='qo ok';else if(i===chosen&&chosen!==correct)b.className='qo ng';
+  });
+  const ex=document.getElementById('qex');if(ex)ex.style.display='block';
+  const s=getQStat();s.total=(s.total||0)+1;if(chosen===correct)s.correct=(s.correct||0)+1;
+  setQStat(s);
+}
+function nextQ(){QI++;QA=false;render()}
+function addQErr(type,qe,ae){
+  const q=decodeURIComponent(qe),a=decodeURIComponent(ae);
+  saveErr([{id:Date.now(),dt:td(),c:type,w:`[题库] ${q.slice(0,50)}`,cor:a,src:'题库练习',note:autoNote(type,q.slice(0,50),a),done:false},...getErr()]);
+  if(event?.target){event.target.textContent='✓ 已加入';event.target.style.color='var(--green)'}
+  rNav();
+}
+function fl(id,t,c){const b=document.getElementById(id);if(!b)return;const o=b.textContent;b.textContent=t;b.style.color=c;setTimeout(()=>{b.textContent=o;b.style.color=''},2000)}
+function exportData(){
+  const d=getUD();
+  const blob=new Blob([JSON.stringify({user:CU,exportAt:new Date().toISOString(),data:d},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+  a.download=`CATTI_PRO_${CU}_${td().replace('/','')}.json`;a.click();URL.revokeObjectURL(url);
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('auth').style.display!=='none'){
+    if(document.getElementById('at1').classList.contains('on'))doLogin();else doReg();
+  }
+});
+updateNet();
+(function(){
+  try{const s=sessionStorage.getItem(AK+'_s');if(s){const{u}=JSON.parse(s);const us=allU();if(us[u]){enterApp(u);return}}}catch{}
+})();
+</script>
+</body>
+</html>
