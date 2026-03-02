@@ -298,6 +298,17 @@ body::after{content:'';position:fixed;top:-30%;left:-20%;width:60%;height:60%;
   .ecols{grid-template-columns:1fr;}
   .g3{grid-template-columns:1fr 1fr;}
 }
+
+/* Modal */
+.modal.hidden{display:none}
+.modal{position:fixed;inset:0;z-index:9999}
+.modal-mask{position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px)}
+.modal-card{position:relative;max-width:920px;width:calc(100% - 24px);margin:38px auto;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--b2);border-radius:16px;box-shadow:0 20px 80px rgba(0,0,0,.55);overflow:hidden}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--b2)}
+.modal-tt{font-family:var(--mono);font-weight:700;letter-spacing:1px;color:var(--cyan)}
+.modal-bd{padding:14px}
+.iconbtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--b2);background:rgba(255,255,255,.04);color:var(--text);cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -397,6 +408,120 @@ const VOCAB_DB=[
   {id:28,en:"rule of law",cn:"法治",tags:["考研","专八","三笔","二笔"],cat:"法律政治",mem:"rule of law=法治，rule by law=依法而治（含义不同）"},
   {id:29,en:"opening up",cn:"对外开放",tags:["三笔","二笔","一笔"],cat:"经济政策",mem:"reform and opening up=改革开放，固定搭配"},
   {id:30,en:"reform and opening up",cn:"改革开放",tags:["三笔","二笔","一笔","三口","二口"],cat:"政治经济",mem:"1978年以来的基本国策，官方标准译法"},
+  {id:31,en:"high-quality development",cn:"高质量发展",tags:["三笔","二笔","一笔"],cat:"宏观发展",mem:"注意连字符/复合词写法"},
+  {id:32,en:"new development philosophy",cn:"新发展理念",tags:["三笔","二笔","一笔"],cat:"宏观发展",mem:"常见政策/时政表达"},
+  {id:33,en:"new development pattern",cn:"新发展格局",tags:["三笔","二笔","一笔"],cat:"宏观发展",mem:"常见政策/时政表达"},
+  {id:34,en:"dual circulation",cn:"双循环",tags:["考研","三笔","二笔","一笔"],cat:"宏观经济",mem:"常见政策/时政表达"},
+  {id:35,en:"high-standard opening up",cn:"高水平对外开放",tags:["三笔","二笔","一笔"],cat:"对外开放",mem:"注意连字符/复合词写法"},
+  {id:36,en:"Belt and Road Initiative (BRI)",cn:"共建“一带一路”倡议",tags:["三笔","二笔","一笔","二口","一口"],cat:"国际合作",mem:"含缩写/全称，注意官方写法"},
+  {id:37,en:"community with a shared future for mankind",cn:"人类命运共同体",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"常见政策/时政表达"},
+  {id:38,en:"global governance",cn:"全球治理",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"常见政策/时政表达"},
+  {id:39,en:"global development initiative",cn:"全球发展倡议",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"常见政策/时政表达"},
+  {id:40,en:"global security initiative",cn:"全球安全倡议",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"常见政策/时政表达"},
+  {id:41,en:"global civilization initiative",cn:"全球文明倡议",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"常见政策/时政表达"},
+  {id:42,en:"multilateralism",cn:"多边主义",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"常见政策/时政表达"},
+  {id:43,en:"non-interference in internal affairs",cn:"不干涉内政",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"注意连字符/复合词写法"},
+  {id:44,en:"peaceful development",cn:"和平发展",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"常见政策/时政表达"},
+  {id:45,en:"whole-process people's democracy",cn:"全过程人民民主",tags:["三笔","二笔","一笔"],cat:"政治",mem:"注意连字符/复合词写法"},
+  {id:46,en:"people-centered development",cn:"以人民为中心的发展思想",tags:["三笔","二笔","一笔"],cat:"政治",mem:"注意连字符/复合词写法"},
+  {id:47,en:"common prosperity",cn:"共同富裕",tags:["三笔","二笔","一笔"],cat:"政治",mem:"常见政策/时政表达"},
+  {id:48,en:"Chinese modernization",cn:"中国式现代化",tags:["三笔","二笔","一笔"],cat:"政治",mem:"常见政策/时政表达"},
+  {id:49,en:"new quality productive forces",cn:"新质生产力",tags:["专八","三笔","二笔","一笔"],cat:"产业科技",mem:"常见政策/时政表达"},
+  {id:50,en:"innovation-driven development",cn:"创新驱动发展",tags:["专八","三笔","二笔","一笔"],cat:"产业科技",mem:"注意连字符/复合词写法"},
+  {id:51,en:"technological self-reliance and self-strengthening",cn:"科技自立自强",tags:["专八","三笔","二笔","一笔"],cat:"产业科技",mem:"注意连字符/复合词写法"},
+  {id:52,en:"key core technologies",cn:"关键核心技术",tags:["专八","三笔","二笔","一笔"],cat:"产业科技",mem:"常见政策/时政表达"},
+  {id:53,en:"digital economy",cn:"数字经济",tags:["专八","三笔","二笔","一笔"],cat:"产业科技",mem:"常见政策/时政表达"},
+  {id:54,en:"integrated circuit (IC)",cn:"集成电路",tags:["专八","三笔","二笔","一笔"],cat:"产业科技",mem:"含缩写/全称，注意官方写法"},
+  {id:55,en:"green and low-carbon transition",cn:"绿色低碳转型",tags:["三笔","二笔","一笔"],cat:"双碳环保",mem:"注意连字符/复合词写法"},
+  {id:56,en:"carbon peak and carbon neutrality",cn:"碳达峰碳中和",tags:["三笔","二笔","一笔"],cat:"双碳环保",mem:"常见政策/时政表达"},
+  {id:57,en:"renewable energy",cn:"可再生能源",tags:["三笔","二笔","一笔"],cat:"双碳环保",mem:"常见政策/时政表达"},
+  {id:58,en:"energy security",cn:"能源安全",tags:["三笔","二笔","一笔"],cat:"双碳环保",mem:"常见政策/时政表达"},
+  {id:59,en:"ecological conservation",cn:"生态保护",tags:["三笔","二笔","一笔"],cat:"双碳环保",mem:"常见政策/时政表达"},
+  {id:60,en:"rural revitalization",cn:"乡村振兴",tags:["三笔","二笔","一笔"],cat:"三农",mem:"常见政策/时政表达"},
+  {id:61,en:"grain security",cn:"粮食安全",tags:["三笔","二笔","一笔"],cat:"三农",mem:"常见政策/时政表达"},
+  {id:62,en:"high-standard farmland",cn:"高标准农田",tags:["三笔","二笔","一笔"],cat:"三农",mem:"注意连字符/复合词写法"},
+  {id:63,en:"new-type urbanization",cn:"新型城镇化",tags:["三笔","二笔","一笔"],cat:"城镇化",mem:"注意连字符/复合词写法"},
+  {id:64,en:"city renewal",cn:"城市更新",tags:["三笔","二笔","一笔"],cat:"城镇化",mem:"常见政策/时政表达"},
+  {id:65,en:"public services",cn:"公共服务",tags:["三笔","二笔","一笔"],cat:"民生",mem:"常见政策/时政表达"},
+  {id:66,en:"social security system",cn:"社会保障体系",tags:["三笔","二笔","一笔"],cat:"民生",mem:"常见政策/时政表达"},
+  {id:67,en:"employment-first policy",cn:"就业优先政策",tags:["三笔","二笔","一笔"],cat:"民生",mem:"注意连字符/复合词写法"},
+  {id:68,en:"elderly care services",cn:"养老服务",tags:["三笔","二笔","一笔"],cat:"民生",mem:"常见政策/时政表达"},
+  {id:69,en:"housing for living, not for speculation",cn:"房住不炒",tags:["三笔","二笔","一笔"],cat:"房地产",mem:"常见政策/时政表达"},
+  {id:70,en:"financial stability",cn:"金融稳定",tags:["考研","三笔","二笔","一笔"],cat:"金融",mem:"常见政策/时政表达"},
+  {id:71,en:"risk prevention and mitigation",cn:"防范化解风险",tags:["考研","三笔","二笔","一笔"],cat:"金融",mem:"常见政策/时政表达"},
+  {id:72,en:"macro-prudential policy",cn:"宏观审慎政策",tags:["考研","三笔","二笔","一笔"],cat:"金融",mem:"注意连字符/复合词写法"},
+  {id:73,en:"debt risk",cn:"债务风险",tags:["考研","三笔","二笔","一笔"],cat:"金融",mem:"常见政策/时政表达"},
+  {id:74,en:"local government debt",cn:"地方政府债务",tags:["考研","三笔","二笔","一笔"],cat:"金融",mem:"常见政策/时政表达"},
+  {id:75,en:"capital market",cn:"资本市场",tags:["考研","三笔","二笔","一笔"],cat:"金融",mem:"常见政策/时政表达"},
+  {id:76,en:"rule of law",cn:"法治",tags:["专八","三笔","二笔","一笔"],cat:"法治",mem:"常见政策/时政表达"},
+  {id:77,en:"law-based governance",cn:"依法治国",tags:["专八","三笔","二笔","一笔"],cat:"法治",mem:"注意连字符/复合词写法"},
+  {id:78,en:"judicial reform",cn:"司法改革",tags:["专八","三笔","二笔","一笔"],cat:"法治",mem:"常见政策/时政表达"},
+  {id:79,en:"intellectual property rights",cn:"知识产权",tags:["专八","三笔","二笔","一笔"],cat:"法治",mem:"常见政策/时政表达"},
+  {id:80,en:"data security",cn:"数据安全",tags:["专八","三笔","二笔","一笔"],cat:"法治",mem:"常见政策/时政表达"},
+  {id:81,en:"cybersecurity",cn:"网络安全",tags:["专八","三笔","二笔","一笔"],cat:"法治",mem:"常见政策/时政表达"},
+  {id:82,en:"national security",cn:"国家安全",tags:["三笔","二笔","一笔"],cat:"安全",mem:"常见政策/时政表达"},
+  {id:83,en:"counter-terrorism",cn:"反恐",tags:["三笔","二笔","一笔"],cat:"安全",mem:"注意连字符/复合词写法"},
+  {id:84,en:"emergency response",cn:"应急响应",tags:["三笔","二笔","一笔"],cat:"安全",mem:"常见政策/时政表达"},
+  {id:85,en:"disaster prevention and mitigation",cn:"防灾减灾",tags:["三笔","二笔","一笔"],cat:"安全",mem:"常见政策/时政表达"},
+  {id:86,en:"humanitarian assistance",cn:"人道主义援助",tags:["三笔","二笔","一笔","二口","一口"],cat:"安全外交",mem:"常见政策/时政表达"},
+  {id:87,en:"consular protection",cn:"领事保护",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"常见政策/时政表达"},
+  {id:88,en:"visa exemption",cn:"免签",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"常见政策/时政表达"},
+  {id:89,en:"strategic partnership",cn:"战略伙伴关系",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"常见政策/时政表达"},
+  {id:90,en:"high-level exchanges",cn:"高层交往",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"注意连字符/复合词写法"},
+  {id:91,en:"trade friction",cn:"贸易摩擦",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:92,en:"tariffs",cn:"关税",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:93,en:"export controls",cn:"出口管制",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:94,en:"supply chain resilience",cn:"供应链韧性",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:95,en:"foreign direct investment (FDI)",cn:"外商直接投资",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"含缩写/全称，注意官方写法"},
+  {id:96,en:"market access",cn:"市场准入",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:97,en:"negative list",cn:"负面清单",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:98,en:"free trade zone (FTZ)",cn:"自由贸易试验区",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"含缩写/全称，注意官方写法"},
+  {id:99,en:"free trade port",cn:"自由贸易港",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:100,en:"business environment",cn:"营商环境",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:101,en:"private sector",cn:"民营经济",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:102,en:"small and medium-sized enterprises (SMEs)",cn:"中小企业",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"含缩写/全称，注意官方写法"},
+  {id:103,en:"new energy vehicles (NEVs)",cn:"新能源汽车",tags:["专八","三笔","二笔","一笔"],cat:"产业",mem:"含缩写/全称，注意官方写法"},
+  {id:104,en:"high-end manufacturing",cn:"高端制造",tags:["专八","三笔","二笔","一笔"],cat:"产业",mem:"注意连字符/复合词写法"},
+  {id:105,en:"specialized and sophisticated SMEs",cn:"专精特新中小企业",tags:["专八","三笔","二笔","一笔"],cat:"产业",mem:"常见政策/时政表达"},
+  {id:106,en:"industrial upgrading",cn:"产业升级",tags:["专八","三笔","二笔","一笔"],cat:"产业",mem:"常见政策/时政表达"},
+  {id:107,en:"domestic demand",cn:"内需",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:108,en:"cross-border e-commerce",cn:"跨境电商",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"注意连字符/复合词写法"},
+  {id:109,en:"RCEP",cn:"《区域全面经济伙伴关系协定》(RCEP)",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:110,en:"CPTPP",cn:"《全面与进步跨太平洋伙伴关系协定》(CPTPP)",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:111,en:"WTO",cn:"世界贸易组织",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:112,en:"IMF",cn:"国际货币基金组织",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:113,en:"World Bank",cn:"世界银行",tags:["考研","三笔","二笔","一笔"],cat:"经贸",mem:"常见政策/时政表达"},
+  {id:114,en:"WHO",cn:"世界卫生组织",tags:["三笔","二笔","一笔","二口","一口"],cat:"国际组织",mem:"常见政策/时政表达"},
+  {id:115,en:"public health",cn:"公共卫生",tags:["三笔","二笔","一笔"],cat:"公共卫生",mem:"常见政策/时政表达"},
+  {id:116,en:"infectious diseases",cn:"传染病",tags:["三笔","二笔","一笔"],cat:"公共卫生",mem:"常见政策/时政表达"},
+  {id:117,en:"cultural confidence",cn:"文化自信",tags:["三笔","二笔","一笔"],cat:"文化",mem:"常见政策/时政表达"},
+  {id:118,en:"cultural heritage",cn:"文化遗产",tags:["三笔","二笔","一笔"],cat:"文化",mem:"常见政策/时政表达"},
+  {id:119,en:"intangible cultural heritage",cn:"非物质文化遗产",tags:["三笔","二笔","一笔"],cat:"文化",mem:"常见政策/时政表达"},
+  {id:120,en:"people-to-people exchanges",cn:"人文交流",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交文化",mem:"注意连字符/复合词写法"},
+  {id:121,en:"infrastructure investment",cn:"基础设施投资",tags:["三笔","二笔","一笔"],cat:"交通基建",mem:"常见政策/时政表达"},
+  {id:122,en:"modern logistics",cn:"现代物流",tags:["三笔","二笔","一笔"],cat:"物流",mem:"常见政策/时政表达"},
+  {id:123,en:"poverty alleviation",cn:"脱贫攻坚",tags:["三笔","二笔","一笔"],cat:"民生",mem:"常见政策/时政表达"},
+  {id:124,en:"targeted poverty alleviation",cn:"精准扶贫",tags:["三笔","二笔","一笔"],cat:"民生",mem:"常见政策/时政表达"},
+  {id:125,en:"income distribution",cn:"收入分配",tags:["三笔","二笔","一笔"],cat:"民生",mem:"常见政策/时政表达"},
+  {id:126,en:"social governance",cn:"社会治理",tags:["三笔","二笔","一笔"],cat:"社会",mem:"常见政策/时政表达"},
+  {id:127,en:"grassroots governance",cn:"基层治理",tags:["三笔","二笔","一笔"],cat:"社会",mem:"常见政策/时政表达"},
+  {id:128,en:"smart city",cn:"智慧城市",tags:["三笔","二笔","一笔"],cat:"城市",mem:"常见政策/时政表达"},
+  {id:129,en:"compulsory education",cn:"义务教育",tags:["考研","专八","三笔","二笔"],cat:"教育",mem:"常见政策/时政表达"},
+  {id:130,en:"vocational education",cn:"职业教育",tags:["考研","专八","三笔","二笔"],cat:"教育",mem:"常见政策/时政表达"},
+  {id:131,en:"research and development (R&D)",cn:"研发",tags:["专八","三笔","二笔","一笔"],cat:"科技",mem:"含缩写/全称，注意官方写法"},
+  {id:132,en:"talent development",cn:"人才培养",tags:["专八","三笔","二笔","一笔"],cat:"科技",mem:"常见政策/时政表达"},
+  {id:133,en:"anti-corruption",cn:"反腐败",tags:["三笔","二笔","一笔"],cat:"政治",mem:"注意连字符/复合词写法"},
+  {id:134,en:"clean governance",cn:"廉洁政府",tags:["三笔","二笔","一笔"],cat:"政治",mem:"常见政策/时政表达"},
+  {id:135,en:"governance capacity",cn:"治理能力",tags:["三笔","二笔","一笔"],cat:"政治",mem:"常见政策/时政表达"},
+  {id:136,en:"national reunification",cn:"国家统一",tags:["三笔","二笔","一笔"],cat:"政治",mem:"常见政策/时政表达"},
+  {id:137,en:"one-China principle",cn:"一个中国原则",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"注意连字符/复合词写法"},
+  {id:138,en:"cross-Strait relations",cn:"两岸关系",tags:["三笔","二笔","一笔"],cat:"政治",mem:"注意连字符/复合词写法"},
+  {id:139,en:"market regulation",cn:"市场监管",tags:["专八","三笔","二笔","一笔"],cat:"法治",mem:"常见政策/时政表达"},
+  {id:140,en:"food safety",cn:"食品安全",tags:["三笔","二笔","一笔"],cat:"民生",mem:"常见政策/时政表达"},
+  {id:141,en:"workplace safety",cn:"安全生产",tags:["三笔","二笔","一笔"],cat:"安全",mem:"常见政策/时政表达"},
+  {id:142,en:"circular economy",cn:"循环经济",tags:["三笔","二笔","一笔"],cat:"双碳环保",mem:"常见政策/时政表达"},
+  {id:143,en:"plastic pollution",cn:"塑料污染",tags:["三笔","二笔","一笔"],cat:"双碳环保",mem:"常见政策/时政表达"},
+  {id:144,en:"maritime rights and interests",cn:"海洋权益",tags:["三笔","二笔","一笔","二口","一口"],cat:"外交",mem:"常见政策/时政表达"},
 ];
 
 const COL_DB=[
@@ -773,7 +898,7 @@ const TABS=[
   {id:'stats',lb:'成绩分析'},
   {id:'curve',lb:'进步曲线'},
   {id:'review',lb:'每日复盘'},
-  {id:'data',lb:'☁️ 数据/同步'},
+  {id:'data',lb:'💾 数据/备份'},
   {id:'guide',lb:'备考指南'},
 ];
 
@@ -798,6 +923,24 @@ function renderTags(tags){
   return tags.map(t=>`<span class="tag ${TAG_STYLES[t]||'tcat'}">${t}</span>`).join('');
 }
 function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+
+const QTYPE_LABELS={
+  all:"全部",
+  hanyi:"汉译英",
+  yihan:"英译汉",
+  vocab:"词汇",
+  term:"术语",
+  grammar:"语法/改错",
+  reading:"阅读理解",
+  cloze:"完形填空",
+  mcq:"选择题",
+  other:"其他"
+};
+function qtLabel(t){
+  if(!t) return "其他";
+  return QTYPE_LABELS[t] || String(t);
+}
 
 /* ================================================================
    UTILS
@@ -850,11 +993,11 @@ function render(){
   const vm=getVMast();const qs=getQStat();
   let html='';
   html+=`<div class="dlbar">
-    <span style="font-size:11px;color:var(--muted2)">💾 数据默认仅在本设备 · 换设备请先导出/导入（可选：启用云同步）</span>
+    <span style="font-size:11px;color:var(--muted2)">💾 数据默认仅在本设备 · 换设备请先导出/导入（本版本：仅本地数据）</span>
     <div style="display:flex;gap:6px;align-items:center">
       <button class="dlbtn" onclick="openImport()">导入</button>
       <button class="dlbtn" onclick="exportData()">导出</button>
-      <button class="dlbtn" onclick="cloudSyncNow()">云同步</button>
+      
     </div>
   </div>`;
 
@@ -891,7 +1034,7 @@ function render(){
     html+=`<div class="card">
       <div class="ct" style="color:var(--indigo)">▸ 今日学习建议</div>
       <div style="font-size:13px;line-height:2;color:var(--text)">
-        📚 词汇已掌握 <strong style="color:var(--green)">${mastCount}</strong>/${VOCAB_DB.length} 个<br>
+        📚 词汇已掌握 <strong style="color:var(--green)">${mastCount}</strong>/${getAllWords().length} 个<br>
         📝 题库已完成 <strong style="color:var(--yellow)">${qs.total||0}</strong> 题，正确率 <strong style="color:${(qs.total>0?(qs.correct/qs.total*100):0)>=70?'var(--green)':'var(--red)'}">${qs.total>0?Math.round(qs.correct/qs.total*100):0}%</strong><br>
         🏛️ 建议今日背诵专名 5-10 个 → <button class="sm" onclick="setTab('pn')" style="margin-left:5px">去专名词典</button>
       </div>
@@ -945,7 +1088,7 @@ function render(){
   /* ─── BANK ─── */
   else if(CTAB==='bank'){
     // 题库：按科目/题型组卷；全部做完后一次性提交评分
-    const raw=QB[CLV]||[];
+    const raw=[...(QB[CLV]||[]), ...(((getUD().myQB||{})[CLV])||[])];
     const qs=raw.map((q,idx)=>({
       ...q,
       _id:q.id||idx,
@@ -953,7 +1096,7 @@ function render(){
       qtype:q.qtype || q.t
     }));
     const subjs=[...new Set(qs.map(x=>x.subj))];
-    const types=['all',...new Set(qs.map(x=>x.qtype))];
+    const types=['all',...new Set(qs.filter(x=>x.subj===BSub).map(x=>x.qtype))];
 
     if(!qs.length){
       html+=`<div class="card" style="text-align:center;padding:40px;color:var(--muted)">题库建设中...</div>`;
@@ -972,7 +1115,7 @@ function render(){
             <div>
               <label class="lb">题型</label>
               <select class="ai" onchange="BType=this.value;render()">
-                ${types.map(t=>`<option value="${esc(t)}" ${BType===t?'selected':''}>${t==='all'?'全部':esc(t)}</option>`).join('')}
+                ${types.map(t=>`<option value="${esc(t)}" ${BType===t?'selected':''}>${t==='all'?'全部':esc(qtLabel(t))}</option>`).join('')}
               </select>
             </div>
             <div>
@@ -1053,7 +1196,7 @@ function render(){
             const uaTxt = (typeof ua==='number' && q.o)? q.o[ua] : (ua||'');
             const caTxt = (q.o&&typeof q.a==='number')? q.o[q.a] : (q.analysis?.best||'');
             return `<div class="qcard" style="margin-bottom:10px">
-              <div class="mu" style="margin-bottom:6px">第 ${idx+1} 题 · ${esc(q.subj)} · ${esc(q.qtype)}</div>
+              <div class="mu" style="margin-bottom:6px">第 ${idx+1} 题 · ${esc(q.subj)} · ${esc(qtLabel(q.qtype))}</div>
               <div class="qtxt">${esc(q.q)}</div>
               <div class="qexp" style="display:block">
                 <div class="qexp-sect">
@@ -1225,59 +1368,48 @@ function render(){
 
   /* ─── DATA / CLOUD ─── */
   else if(CTAB==='data'){
-    const p=getCloudCfg();
     html+=`<div class="card">
       <div class="ct">▸ 数据备份（换设备必用）</div>
       <div class="mu" style="line-height:1.9">
-        • 当前模式：默认只存在本设备浏览器。<br>
-        • 换电脑/换手机：先导出 JSON，再在新设备导入即可。<br>
-        • 若想免费云端同步：可以用 Firebase（免费额度）/ Supabase（免费额度）。我已预留 Firebase 云同步入口（可选）。
+        • 当前版本：<b>仅本地数据</b>（浏览器本地存储）。<br>
+        • 换电脑/换手机：先<b>导出</b>，再在新设备<b>导入</b>即可。<br>
+        • 建议：每周导出一次备份（文件很小）。<br>
       </div>
       <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
         <button class="btn bc" onclick="exportData()">导出备份</button>
-        <button class="btn" onclick="openImport()">导入备份</button>
-        <button class="btn" onclick="cloudSyncNow()">云同步（可选）</button>
+        <button class="btn" onclick="openImport()">智能导入 / 导入备份</button>
       </div>
     </div>`;
 
     html+=`<div class="card">
-      <div class="ct">▸ 云同步（Firebase 免费方案，可选启用）</div>
+      <div class="ct">▸ 资料入库 & 自动转题库（智能识别）</div>
       <div class="mu" style="line-height:1.9;color:var(--muted2)">
-        说明：GitHub Pages 是静态站，想跨设备“自动同步”需要一个云数据库。Firebase 的 Spark 计划可免费使用（有额度限制）。<br>
-        你只要在 Firebase 控制台创建项目，把 config 粘贴进来，再设置一个云账号（邮箱+密码）即可。
+        你可以上传/粘贴：政府工作报告选段、外交部发言稿、China Daily 摘录、真题/解析等。系统会尽量自动：<br>
+        • 识别【汉译英/英译汉】并转为题库；<br>
+        • 识别 A/B/C/D 选项并转为选择题；<br>
+        • 同时把原文存进“资料库”，便于日后检索/复盘。<br>
+        <span style="color:var(--muted2)">链接抓取可能被浏览器跨域限制：若失败，请“网页另存为HTML”或复制粘贴文本。</span>
       </div>
-      <label class="lb">Firebase Config（JSON）</label>
-      <textarea class="ta" id="fbCfg" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}'>${esc(p?.cfg||'')}</textarea>
-      <div class="g2" style="margin-top:10px">
-        <div><label class="lb">云账号邮箱</label><input class="ai" id="fbEmail" value="${esc(p?.email||'')}" placeholder="you@example.com"/></div>
-        <div><label class="lb">云账号密码</label><input class="ai" id="fbPass" type="password" value="${esc(p?.pass||'')}" placeholder="至少6位"/></div>
-      </div>
-      <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn bc" onclick="cloudSaveCfg()">保存配置</button>
-        <button class="btn" onclick="cloudConnect()">连接并拉取</button>
-        <button class="btn" onclick="cloudPush()">推送到云端</button>
-        <button class="btn br" onclick="cloudDisable()">关闭云同步</button>
-      </div>
-      <div class="mu" style="margin-top:10px;color:var(--muted2)">当前：${p?.cfg?'已填写配置':'未启用'} · ${p?.email?esc(p.email):'未填账号'}</div>
+      <button class="btn" style="margin-top:12px" onclick="openImport()">打开智能导入</button>
     </div>`;
   }
 
-/* ─── VOCAB ─── */
-  else if(CTAB==='vocab'){
+CTAB==='vocab'){
     const vm=getVMast();
     const mastCount=Object.values(vm).filter(Boolean).length;
     const ALL_TAGS=['专八','考研','三笔','二笔','一笔','三口','二口','一口'];
-    const filtered=VFilter==='all'?VOCAB_DB:VFilter==='mastered'?VOCAB_DB.filter(v=>vm[v.id]):VFilter==='unmastered'?VOCAB_DB.filter(v=>!vm[v.id]):VOCAB_DB.filter(v=>v.tags.includes(VFilter));
+    const WORDS=getAllWords();
+    const filtered=VFilter==='all'?WORDS:VFilter==='mastered'?WORDS.filter(v=>vm[v.id]):VFilter==='unmastered'?WORDS.filter(v=>!vm[v.id]):WORDS.filter(v=>v.tags.includes(VFilter));
     html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div style="font-size:11px;color:var(--muted2);font-family:var(--mono)">已掌握 <strong style="color:var(--green)">${mastCount}</strong>/${VOCAB_DB.length}</div>
+      <div style="font-size:11px;color:var(--muted2);font-family:var(--mono)">已掌握 <strong style="color:var(--green)">${mastCount}</strong>/${getAllWords().length}</div>
       <div style="display:flex;gap:6px">
         <button class="sm${VMode==='list'?' ok':''}" onclick="setVM('list')">列表</button>
         <button class="sm${VMode==='flash'?' ok':''}" onclick="setVM('flash')">闪卡</button>
       </div>
     </div>
     <div class="chips">
-      <button class="chip${VFilter==='all'?' on':''}" onclick="setVF('all')">全部 (${VOCAB_DB.length})</button>
-      ${ALL_TAGS.map(t=>{const c=VOCAB_DB.filter(v=>v.tags.includes(t)).length;return`<button class="chip${VFilter===t?' on':''}" onclick="setVF('${t}')">${t} (${c})</button>`}).join('')}
+      <button class="chip${VFilter==='all'?' on':''}" onclick="setVF('all')">全部 (${getAllWords().length})</button>
+      ${ALL_TAGS.map(t=>{const c=getAllWords().filter(v=>v.tags.includes(t)).length;return`<button class="chip${VFilter===t?' on':''}" onclick="setVF('${t}')">${t} (${c})</button>`}).join('')}
       <button class="chip${VFilter==='mastered'?' on':''}" onclick="setVF('mastered')" style="${VFilter==='mastered'?'':'border-color:var(--green);color:var(--green);opacity:.7'}">✓ 已掌握</button>
       <button class="chip${VFilter==='unmastered'?' on':''}" onclick="setVF('unmastered')" style="${VFilter==='unmastered'?'':'border-color:var(--red);color:var(--red);opacity:.7'}">未掌握</button>
     </div>`;
@@ -1445,7 +1577,7 @@ function render(){
     html+=`</div>`;
     // 学习统计
     html+=`<div class="g2">
-      <div class="sc"><div class="sn" style="color:var(--green)">${mastV}</div><div class="sl">词汇已掌握</div><div class="ss">共${VOCAB_DB.length}个</div></div>
+      <div class="sc"><div class="sn" style="color:var(--green)">${mastV}</div><div class="sl">词汇已掌握</div><div class="ss">共${getAllWords().length}个</div></div>
       <div class="sc"><div class="sn" style="color:var(--cyan)">${mastPN}</div><div class="sl">专名已掌握</div><div class="ss">共${PN_DB.length}个</div></div>
       <div class="sc"><div class="sn" style="color:var(--yellow)">${qs2.total||0}</div><div class="sl">题库已做</div><div class="ss">正确${qs2.correct||0}题</div></div>
       <div class="sc"><div class="sn" style="color:${(qs2.total>0?qs2.correct/qs2.total*100:0)>=70?'var(--green)':'var(--red)'}">${qs2.total>0?Math.round(qs2.correct/qs2.total*100):0}%</div><div class="sl">题库正确率</div></div>
@@ -1527,7 +1659,7 @@ function render(){
       if(y!=null&&y<70)tips.push('• 英译汉：经济类英文400词，练中文流畅度，消除翻译腔');
       if(z!=null&&z<70)tips.push('• 综合：刷10道词汇辨析，错的加入词汇库');
       if(!tips.length)tips.push('• 今天表现不错，明天可提高材料难度');
-      tips.push(`• 词汇库背 ${Math.min(10,VOCAB_DB.length-Object.values(getVMast()).filter(Boolean).length)} 个新词`);
+      tips.push(`• 词汇库背 ${Math.min(10,getAllWords().length-Object.values(getVMast()).filter(Boolean).length)} 个新词`);
       tips.push(`• 专名词典背 5 个新专名 → 当前已掌握${Object.values(getPNStat()).filter(Boolean).length}/${PN_DB.length}`);
       html+=`<div class="rb"><div class="rt" style="color:var(--cyan)">▸ 明日行动建议</div><div class="rr">${tips.join('<br>')}</div></div>`;
       const undone=errs.filter(e=>!e.done);
@@ -1638,401 +1770,418 @@ function isDue(dateStr){
   return dateStr<=ymd();
 }
 
-// ---- Import/Export UI
+// ---- Smart Import/Export（本地数据，云同步已移除）
 (function(){
+  // hidden file input (accept any)
   if(!document.getElementById('imf')){
     const inp=document.createElement('input');
-    inp.type='file'; inp.id='imf'; inp.accept='application/json'; inp.style.display='none';
-    inp.addEventListener('change',()=>{ if(inp.files&&inp.files[0]) importData(inp.files[0]); inp.value=''; });
+    inp.type='file'; inp.id='imf'; inp.accept='*/*'; inp.style.display='none';
+    inp.addEventListener('change',()=>{ if(inp.files&&inp.files[0]) smartImportFile(inp.files[0]); inp.value=''; });
     document.body.appendChild(inp);
   }
+  // modal
+  if(!document.getElementById('imodal')){
+    const div=document.createElement('div');
+    div.id='imodal';
+    div.className='modal hidden';
+    div.innerHTML=`
+      <div class="modal-mask" onclick="closeImportModal()"></div>
+      <div class="modal-card">
+        <div class="modal-hd">
+          <div class="modal-tt">📥 智能导入 / 资料入库</div>
+          <button class="iconbtn" onclick="closeImportModal()">✕</button>
+        </div>
+        <div class="modal-bd">
+          <div class="muted" style="font-size:12px;line-height:1.55">
+            你可以上传<strong>任意格式</strong>（TXT/HTML/JSON/CSV/PDF/zip等）或粘贴文本/链接。系统会尽量自动识别：<br>
+            • <b>全量备份</b>：换设备恢复账号数据<br>
+            • <b>词汇/搭配/专名</b>：抽取入库（可用于列表+闪卡）<br>
+            • <b>真题/解析/选段</b>：自动转为题库（汉译英/英译汉/术语/词汇等）并保存为“资料”便于索引<br>
+            <span style="color:var(--muted2)">提示：网站链接抓取可能受浏览器跨域(CORS)限制；若失败，请“网页另存为HTML”后再上传，或复制粘贴文本。</span>
+          </div>
+
+          <div class="g2" style="margin-top:12px">
+            <div>
+              <label class="lb">导入目标等级</label>
+              <select class="ai" id="im_lv">
+                <option value="2">二级</option>
+                <option value="3">三级</option>
+              </select>
+            </div>
+            <div>
+              <label class="lb">导入策略</label>
+              <select class="ai" id="im_mode">
+                <option value="auto">自动识别</option>
+                <option value="backup">强制当作：全量备份</option>
+                <option value="words">强制当作：词库</option>
+                <option value="bank">强制当作：题库/真题</option>
+                <option value="material">强制当作：资料原文</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+            <button class="dlbtn" onclick="pickImportFile()">选择文件</button>
+            <button class="dlbtn" onclick="smartImportText()">粘贴文本导入</button>
+            <button class="dlbtn" onclick="smartImportURL()">链接导入</button>
+            <button class="dlbtn" onclick="exportData()">导出全量备份</button>
+          </div>
+
+          <div class="g2" style="margin-top:10px">
+            <div>
+              <label class="lb">链接（可选）</label>
+              <input class="ai" id="im_url" placeholder="粘贴链接，如政府工作报告/外交部/学习网站等"/>
+            </div>
+            <div>
+              <label class="lb">标题（可选）</label>
+              <input class="ai" id="im_title" placeholder="如：2024政府工作报告选段 / 2021真题解析"/>
+            </div>
+          </div>
+
+          <label class="lb" style="margin-top:10px">文本（可选：可直接粘贴真题/解析/选段）</label>
+          <textarea class="ta" id="im_text" placeholder="直接粘贴内容：可包含【汉译英】/【英译汉】/A.B.C选项/参考答案等，系统会尽量自动拆题并入库"></textarea>
+
+          <div class="muted" style="margin-top:10px;font-size:12px" id="im_log">等待导入…</div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(div);
+  }
 })();
-function openImport(){ document.getElementById('imf')?.click(); }
-function importData(file){
-  const r=new FileReader();
-  r.onload=()=>{
-    try{
-      const obj=JSON.parse(r.result);
-      const d=obj?.data;
-      if(!d||typeof d!=='object') throw new Error('格式不正确');
-      // 直接覆盖当前用户数据（最安全/最一致）
-      setUD(d);
-      sync('ok');
-      alert('导入成功：已覆盖当前账号数据。');
-      render();
-    }catch(e){
-      alert('导入失败：'+(e?.message||e));
-    }
-  };
-  r.readAsText(file,'utf-8');
+function openImport(){
+  const lvSel=document.getElementById('im_lv');
+  if(lvSel) lvSel.value=String(CLV||2);
+  document.getElementById('im_log').textContent='等待导入…';
+  document.getElementById('imodal').classList.remove('hidden');
 }
+function closeImportModal(){ document.getElementById('imodal')?.classList.add('hidden'); }
+function pickImportFile(){ document.getElementById('imf')?.click(); }
+function logImport(s){ const el=document.getElementById('im_log'); if(el) el.textContent=s; }
 
-// ---- Plan
-function getPlan(){ return getUD().plan||[]; }
-function savePlan(plan){ const d=getUD(); d.plan=plan; setUD(d); sync('ok'); }
-function planUpsert(item){
-  const plan=getPlan();
-  // same key+kind de-dup
-  const key=(item.kind||'')+'|'+(item.en||item.key||'')+'|'+(item.cn||'');
-  const i=plan.findIndex(p=>((p.kind||'')+'|'+(p.en||p.key||'')+'|'+(p.cn||''))===key);
-  if(i>=0){
-    // 若存在：把 next 提前（更紧迫）
-    plan[i].next = (plan[i].next && plan[i].next<item.next) ? plan[i].next : item.next;
-    plan[i].note = plan[i].note || item.note;
-    plan[i].src = plan[i].src || item.src;
-  }else{
-    plan.unshift(item);
-  }
-  savePlan(plan);
-}
-function planFromAnalysis(q){
-  const a=q?.analysis;
-  if(!a) return;
-  const src = q?.analysis?.src || '题库解析';
-  const date = ymd();
-  (a.vocab||[]).forEach(v=>{
-    planUpsert({id:Date.now()+Math.floor(Math.random()*9999), kind:'词汇', key:v.w, en:v.t, cn:v.w, note:`来自：${src}`, src, next:addDays(date,1), step:0});
-  });
-  // 若有最佳译文，也可以当句型复习
-  if(a.best && (q.t==='hanyi'||q.t==='yihan')){
-    planUpsert({id:Date.now()+Math.floor(Math.random()*9999), kind:'句型/译文', key:q.q.slice(0,24), en:a.best, cn:'', note:(a.note||'').slice(0,120), src, next:addDays(date,3), step:0});
-  }
-}
-const PLAN_STEPS=[1,3,7,14,30,60];
-function planDone(id){
-  const plan=getPlan();
-  const i=plan.findIndex(p=>p.id===id);
-  if(i<0) return;
-  const p=plan[i];
-  const step=Math.min((p.step||0)+1, PLAN_STEPS.length-1);
-  p.step=step;
-  p.next=addDays(ymd(), PLAN_STEPS[step]);
-  // 若已到高阶，标记掌握（可清理）
-  if(step>=4) p.mastered=true;
-  plan[i]=p;
-  savePlan(plan);
-  render();
-}
-function planSnooze(id,days){
-  const plan=getPlan();
-  const i=plan.findIndex(p=>p.id===id);
-  if(i<0) return;
-  plan[i].next=addDays(ymd(),days);
-  savePlan(plan); render();
-}
-function planRemove(id){
-  savePlan(getPlan().filter(p=>p.id!==id));
-  render();
-}
-function planClearDone(){
-  savePlan(getPlan().filter(p=>!p.mastered));
-  render();
-}
-function planAuto(){
-  // 从错题本抽取关键词（简单策略：把 note 里出现的“正确表达/关键”当提示）
-  const errs=getErr();
-  errs.slice(0,80).forEach(e=>{
-    if(e.cor){
-      planUpsert({id:Date.now()+Math.floor(Math.random()*9999), kind:'错题回顾', key:e.w, en:e.cor, cn:'', note:(e.note||'').slice(0,120), src:e.src||'错题本', next:addDays(ymd(),1), step:0});
-    }
-  });
-  alert('已从错题本补充生成计划（取前80条）。');
-  render();
-}
-
-// ---- Errors (auto add without UI)
-function addQErrAuto(q){
-  const type=q.t||q.qtype||'bank';
-  const qtxt=q.q||'';
-  const ans=(q.analysis?.best) || (q.o && typeof q.a==='number' ? q.o[q.a] : '');
-  const errs=getErr();
-  saveErr([{id:Date.now()+Math.floor(Math.random()*9999),dt:td(),c:type,w:`[题库] ${qtxt.slice(0,50)}`,cor:ans,src:'题库提交',note:autoNote(type,qtxt.slice(0,50),ans),done:false},...errs]);
-}
-
-// ---- Bank session logic
-function bankStart(){
-  const raw=QB[CLV]||[];
-  let qs=raw.map((q,idx)=>({ ...q,_id:q.id||idx, subj:q.subj || ((q.t==='hanyi'||q.t==='yihan')?'实务':'综合能力'), qtype:q.qtype || q.t }));
-  qs=qs.filter(q=>q.subj===BSub);
-  if(BType!=='all') qs=qs.filter(q=>q.qtype===BType);
-  qs=shuffle(qs);
-  if(BNum>0) qs=qs.slice(0,Math.min(BNum,qs.length));
-  BSession={stage:'doing',subj:BSub,type:BType,list:qs,ans:{},idx:0,startedAt:Date.now()};
-  render();
-}
-function bankPick(i){
-  const s=BSession; if(!s||s.stage!=='doing') return;
-  const q=s.list[s.idx];
-  s.ans[q._id]=i;
-  BSession=s;
-  render();
-}
-function bankTypeAnswer(v){
-  const s=BSession; if(!s||s.stage!=='doing') return;
-  const q=s.list[s.idx];
-  s.ans[q._id]=v;
-  BSession=s;
-}
-function bankPrev(){ if(!BSession||BSession.stage!=='doing') return; BSession.idx=Math.max(0,BSession.idx-1); render(); }
-function bankNext(){ if(!BSession||BSession.stage!=='doing') return; BSession.idx=Math.min(BSession.list.length-1,BSession.idx+1); render(); }
-function bankSubmit(){
-  const s=BSession; if(!s||s.stage!=='doing') return;
-  const total=s.list.length;
-  const keys=Object.keys(s.ans||{});
-  if(keys.length<total){ alert('请先完成全部题目再提交。'); return; }
-
-  let correct=0, wrongQs=[];
-  s.list.forEach(q=>{
-    const ua=s.ans[q._id];
-    if(typeof q.a==='number' && typeof ua==='number'){
-      if(ua===q.a) correct++;
-      else wrongQs.push(q);
-    }else{
-      // 非选择题暂不自动判分：一律算未判（不计对）
-      wrongQs.push(q);
-    }
-  });
-  const acc=Math.round(correct/total*100);
-
-  // 更新累计统计
-  const qstat=getQStat();
-  qstat.total=(qstat.total||0)+total;
-  qstat.correct=(qstat.correct||0)+correct;
-  qstat.byType=qstat.byType||{};
-  s.list.forEach(q=>{
-    const t=q.qtype||q.t||'other';
-    qstat.byType[t]=qstat.byType[t]||{t:0,c:0};
-    qstat.byType[t].t+=1;
-    const ua=s.ans[q._id];
-    if(typeof q.a==='number' && typeof ua==='number' && ua===q.a) qstat.byType[t].c+=1;
-  });
-  setQStat(qstat);
-
-  // 错题入错题本 + 生成计划
-  wrongQs.forEach(q=>{
-    addQErrAuto(q);
-    planFromAnalysis(q);
-  });
-
-  // 保存本次session日志（用于后续更丰富的统计）
-  const d=getUD(); d.sessions=d.sessions||[];
-  d.sessions.unshift({id:Date.now(),dt:ymd(),subj:s.subj,type:s.type,total,correct,acc});
-  setUD(d);
-
-  s.stage='result';
-  s.result={total,correct,acc,wrong:wrongQs.length};
-  BSession=s;
-  rNav();
-  render();
-}
-function bankReset(){ BSession=null; render(); }
-
-// ---- Flashcards
-function getAllWords(){
+function ensureUDShape(){
   const d=getUD();
-  const my=d.myWords||[];
-  return [...VOCAB_DB, ...my];
+  d.myWords=d.myWords||[];
+  d.materials=d.materials||[];
+  d.myQB=d.myQB||{2:[],3:[]};
+  setUD(d);
+  return d;
 }
-function getFKnown(){ return getUD().fknown||{}; }
-function setFKnown(k){ const d=getUD(); d.fknown=k; setUD(d); sync('ok'); }
-const _FLASH={deck:[],sig:''};
-function flashRebuild(){ _FLASH.sig=''; FIdx=0; FReveal=false; }
-function flashGetDeck(){
-  const all=getAllWords();
-  const deck=all.filter(w=>{
-    const okTag=(FTag==='all') || (w.tags||[]).includes(FTag);
-    const okCat=(FCat==='all') || ((w.cat||'其他')===FCat);
-    return okTag && okCat;
+function getMyQB(){ const d=ensureUDShape(); return d.myQB; }
+function setMyQB(qb){ const d=ensureUDShape(); d.myQB=qb; setUD(d); sync('ok'); }
+function addMyQuestions(lv, qs){
+  if(!qs||!qs.length) return 0;
+  const qb=getMyQB(); qb[lv]=qb[lv]||[];
+  // assign ids
+  const base=Date.now();
+  qs.forEach((q,i)=>{ if(!q.id) q.id = 'm'+(base+i); q.lv=lv; });
+  qb[lv]=qb[lv].concat(qs);
+  setMyQB(qb);
+  return qs.length;
+}
+function addMyWords(words){
+  if(!words||!words.length) return 0;
+  const d=ensureUDShape();
+  const exist=new Set(d.myWords.map(w=>`${w.en}|||${w.cn}`));
+  let add=0;
+  const base=100000 + (d.myWords.length||0);
+  words.forEach((w,i)=>{
+    if(!w?.en||!w?.cn) return;
+    const key=`${w.en}|||${w.cn}`;
+    if(exist.has(key)) return;
+    exist.add(key);
+    d.myWords.push({id:base+i,en:w.en,cn:w.cn,tags:w.tags||["二笔"],cat:w.cat||"自定义",mem:w.mem||""});
+    add++;
   });
-  const sig=FTag+'|'+FCat+'|'+deck.length;
-  if(_FLASH.sig!==sig){ _FLASH.deck=shuffle(deck.slice()); _FLASH.sig=sig; FIdx=0; FReveal=false; }
-  return _FLASH.deck;
+  setUD(d); sync('ok');
+  return add;
 }
-function flashPrev(){ const d=flashGetDeck(); if(!d.length) return; FIdx=(FIdx-1+d.length)%d.length; FReveal=false; render(); }
-function flashNext(){ const d=flashGetDeck(); if(!d.length) return; FIdx=(FIdx+1)%d.length; FReveal=false; render(); }
-function flashMark(ok){
-  const d=flashGetDeck(); if(!d.length) return;
-  const cur=d[FIdx%d.length];
-  const known=getFKnown();
-  if(ok){
-    known[cur.id||cur.en]=1;
-    setFKnown(known);
-  }else{
-    // 不会：加入计划
-    planUpsert({id:Date.now()+Math.floor(Math.random()*9999),kind:'背词',key:cur.en,en:cur.en,cn:cur.cn,note:cur.mem||'',src:'闪卡',next:addDays(ymd(),1),step:0});
-  }
-  flashNext();
+function addMaterial(meta){
+  const d=ensureUDShape();
+  const item={id:'mat_'+Date.now(),title:meta.title||'未命名资料',url:meta.url||'',source:meta.source||'上传/粘贴',importedAt:new Date().toISOString(),text:meta.text||''};
+  d.materials.unshift(item);
+  if(d.materials.length>200) d.materials.length=200;
+  setUD(d); sync('ok');
+  return item.id;
 }
 
-// ---- IPA & Audio (dictionaryapi.dev)
-async function dictLookup(word){
-  const d=getUD(); d.dictCache=d.dictCache||{};
-  if(d.dictCache[word]) return d.dictCache[word];
-  const url=`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`;
-  const res=await fetch(url);
-  if(!res.ok) throw new Error('查词失败');
-  const js=await res.json();
-  const phonetics=[];
-  let aud=null;
-  (js||[]).forEach(ent=>{
-    (ent.phonetics||[]).forEach(p=>{
-      if(p.text) phonetics.push(p.text);
-      if(!aud && p.audio) aud=p.audio;
-    });
-  });
-  const out={phonetics:[...new Set(phonetics)].slice(0,3), audio:aud||null};
-  d.dictCache[word]=out; setUD(d);
+// ---------- Smart Detect ----------
+function tryParseJSON(txt){
+  try{ return JSON.parse(txt); }catch{ return null; }
+}
+function looksLikeCSV(txt){
+  const head=txt.split('\n').slice(0,5).join('\n');
+  return /,|\t|;/.test(head) && (/(en|english)/i.test(head) || /(cn|chinese)/i.test(head) || /词汇|中文|英文/.test(head));
+}
+function parseCSVWords(txt){
+  const lines=txt.replace(/\r/g,'').split('\n').filter(x=>x.trim());
+  if(lines.length<2) return [];
+  const sep = (lines[0].includes('\t')?'\t': (lines[0].includes(';')?';':','));
+  const cols=lines[0].split(sep).map(x=>x.trim().toLowerCase());
+  const idxEn=cols.findIndex(c=>['en','english','word','term','phrase','英文'].includes(c));
+  const idxCn=cols.findIndex(c=>['cn','chinese','meaning','中文','释义'].includes(c));
+  const idxTag=cols.findIndex(c=>['tag','tags','level','标签','等级'].includes(c));
+  const idxCat=cols.findIndex(c=>['cat','category','分类'].includes(c));
+  const idxMem=cols.findIndex(c=>['mem','note','备注','例句'].includes(c));
+  const out=[];
+  for(let i=1;i<lines.length;i++){
+    const parts=lines[i].split(sep);
+    const en=(parts[idxEn]||'').trim();
+    const cn=(parts[idxCn]||'').trim();
+    if(!en||!cn) continue;
+    const tagsRaw=(idxTag>=0?(parts[idxTag]||''):'').trim();
+    const tags=tagsRaw?tagsRaw.split(/[\s,，;；|/]+/).filter(Boolean):["二笔"];
+    out.push({en,cn,tags,cat: idxCat>=0?(parts[idxCat]||'').trim():"自定义",mem: idxMem>=0?(parts[idxMem]||'').trim():""});
+  }
   return out;
 }
-async function flashLoadIPA(w){
-  try{
-    const word=decodeURIComponent(w);
-    const out=await dictLookup(word);
-    const el=document.getElementById('ipa');
-    if(el) el.textContent=out.phonetics?.join('  ')||'（无音标数据）';
-  }catch(e){ alert('获取音标失败：'+(e?.message||e)); }
-}
-async function flashSpeak(w){
-  try{
-    const word=decodeURIComponent(w);
-    const out=await dictLookup(word);
-    if(out.audio){
-      const a=new Audio(out.audio);
-      a.play();
-    }else{
-      alert('未找到可用发音音频（该API可能无该词音频）。');
+
+function parseTextToQuestions(txt){
+  const lines=txt.replace(/\r/g,'').split('\n');
+  const qs=[];
+  let curType=null, curSub=null, buf=[];
+  const flush=()=>{
+    const content=buf.join('\n').trim();
+    if(!content) { buf=[]; return; }
+    if(!curType){
+      buf=[]; return;
     }
-  }catch(e){ alert('发音失败：'+(e?.message||e)); }
+    // Try detect answer section inside
+    let qText=content, ans=null;
+    const m=content.match(/(?:参考答案|答案|Answer)[:：]\s*([A-D]|[^\n]+)/i);
+    if(m){ ans=m[1].trim(); qText=content.replace(m[0],'').trim(); }
+    qs.push({
+      t:curType,
+      q:(curType==='hanyi'||curType==='yihan')?(`【${qtLabel(curType)}】\n`+qText):qText,
+      o: (curType==='mcq'? extractOptions(qText) : null),
+      a: ans? ans : null,
+      analysis: null,
+      subj: curSub || ((curType==='hanyi'||curType==='yihan')?'实务':'综合能力'),
+      qtype: curType
+    });
+    buf=[];
+  };
+  const setType=(t)=>{
+    flush();
+    curType=t; 
+    curSub = ((t==='hanyi'||t==='yihan')?'实务':'综合能力');
+  };
+
+  for(const raw of lines){
+    const line=raw.trim();
+    if(!line) { 
+      // blank line separates
+      if(buf.length) flush();
+      continue;
+    }
+    // headings
+    if(/汉译英/.test(line)) { setType('hanyi'); continue; }
+    if(/英译汉/.test(line)) { setType('yihan'); continue; }
+    if(/术语/.test(line) && /题|测试|练习|词/.test(line)) { setType('term'); continue; }
+    if(/词汇/.test(line) && /题|测试|练习|词/.test(line)) { setType('vocab'); continue; }
+    if(/语法|改错/.test(line)) { setType('grammar'); continue; }
+    if(/阅读理解|阅读/.test(line)) { setType('reading'); continue; }
+    if(/完形/.test(line)) { setType('cloze'); continue; }
+    // MCQ options pattern triggers mcq
+    if(/^[A-D][\.\、\)]\s*/.test(line) && curType!=='mcq'){
+      setType('mcq');
+    }
+    // numbering starts a new question for translation too
+    if(/^\d+[\.\、\)]\s*/.test(line) && buf.length){
+      flush();
+    }
+    buf.push(raw);
+  }
+  flush();
+  // remove empties
+  return qs.filter(q=>q.q && String(q.q).trim());
 }
 
-// ---- Hotwords
-let HOT_IMPORT_OPEN=false;
-function getHotwords(){ return getUD().hotwords||[]; }
-function setHotwords(x){ const d=getUD(); d.hotwords=x; setUD(d); sync('ok'); }
-async function hotUpdate(){
-  try{
-    const res=await fetch('./hotwords.json?ts='+Date.now());
-    if(!res.ok) throw new Error('未找到 hotwords.json（建议配置 GitHub Actions 自动生成）');
-    const js=await res.json();
-    if(!Array.isArray(js)) throw new Error('格式应为数组');
-    setHotwords(js);
-    alert('更新成功：'+js.length+'条');
-    render();
-  }catch(e){
-    alert('更新失败：'+(e?.message||e));
+function extractOptions(qText){
+  // parse options in block
+  const opts=[];
+  const lines=qText.split('\n');
+  for(const ln of lines){
+    const m=ln.match(/^[A-D][\.\、\)]\s*(.+)$/);
+    if(m) opts.push(m[1].trim());
   }
+  return opts.length?opts:null;
 }
-function hotOpenImport(v=true){ HOT_IMPORT_OPEN = (v!==false); render(); }
-function hotClear(){ setHotwords([]); render(); }
-function hotDoImport(){
-  const ta=document.getElementById('hotTa');
-  if(!ta) return;
-  const txt=ta.value.trim();
-  if(!txt){ alert('请先粘贴内容'); return; }
+
+function extractWordsFromText(txt){
+  // crude: extract multi-word English phrases (2-6 words) and acronyms
+  const out=[];
+  const seen=new Set();
+  const englishPhrases=txt.match(/[A-Za-z][A-Za-z\-\s]{2,60}[A-Za-z]/g) || [];
+  for(const ph of englishPhrases){
+    const s=ph.replace(/\s+/g,' ').trim();
+    if(s.length<4||s.length>50) continue;
+    // filter common noise
+    if(/^(the|and|with|from|that|this|have|has|will|would|shall|should|could|can|may|might)\b/i.test(s)) continue;
+    if(seen.has(s.toLowerCase())) continue;
+    seen.add(s.toLowerCase());
+    out.push({en:s,cn:"",tags:["二笔"],cat:"待补充",mem:"从资料中自动抽取（请补中文释义）"});
+    if(out.length>=30) break;
+  }
+  return out;
+}
+
+async function smartImportFile(file){
   try{
-    let arr=[];
-    if(txt.startsWith('[')){
-      arr=JSON.parse(txt);
-    }else{
-      arr=txt.split(/\n+/).map(line=>line.trim()).filter(Boolean).map(line=>{
-        const parts=line.split('|||').map(x=>x.trim());
-        return {en:parts[0]||'',cn:parts[1]||'',note:parts[2]||'',date:parts[3]||ymd(),src:parts[4]||'manual'};
-      });
+    const lv=parseInt(document.getElementById('im_lv')?.value||String(CLV||2),10);
+    const mode=document.getElementById('im_mode')?.value||'auto';
+    const title=(document.getElementById('im_title')?.value||file.name||'上传文件').trim();
+    logImport(`读取文件：${file.name} (${Math.round(file.size/1024)}KB)…`);
+    // handle binary types
+    const nameLower=(file.name||'').toLowerCase();
+    if(nameLower.endsWith('.pdf')){
+      logImport('检测到PDF：浏览器端难以稳定解析。建议：复制文字内容粘贴到文本框，或将PDF转TXT/Word后再导入。已仅存档文件名。');
+      addMaterial({title,url:'',source:'PDF上传(未解析)',text:`[PDF] ${file.name}`});
+      alert('已存档：PDF（未解析）。建议把文字复制出来再导入。');
+      render(); return;
     }
-    arr=arr.filter(x=>x.en||x.cn);
-    const cur=getHotwords();
-    setHotwords([...arr,...cur].slice(0,5000));
-    HOT_IMPORT_OPEN=false;
-    alert('导入成功：'+arr.length+'条');
-    render();
+    if(nameLower.endsWith('.apkg')||nameLower.endsWith('.zip')){
+      logImport('检测到压缩包/Anki：当前版本不解析apkg/zip。请在 Anki 导出为 TXT/CSV 后再导入。');
+      addMaterial({title,source:'压缩包/Anki(未解析)',text:`[ZIP/APKG] ${file.name}`});
+      alert('暂不支持解析 apkg/zip。请导出为 txt/csv 再导入。');
+      render(); return;
+    }
+    const text = await file.text();
+    await smartDetectAndImport({text, title, url:'', lv, mode, source:`文件：${file.name}`});
   }catch(e){
     alert('导入失败：'+(e?.message||e));
   }
 }
 
-// ---- Cloud (Firebase optional)
-function getCloudCfg(){
-  try{ return JSON.parse(localStorage.getItem(AK+'_cloudcfg')||'null'); }catch{ return null; }
-}
-function setCloudCfg(cfg){ localStorage.setItem(AK+'_cloudcfg',JSON.stringify(cfg||null)); }
-async function cloudInit(){
-  const cfg=getCloudCfg();
-  if(!cfg?.cfg) throw new Error('未填写 Firebase Config');
-  if(window.__fb) return window.__fb;
-  const appMod=await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js');
-  const authMod=await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js');
-  const fsMod=await import('https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js');
-  const app=appMod.initializeApp(JSON.parse(cfg.cfg));
-  const auth=authMod.getAuth(app);
-  const db=fsMod.getFirestore(app);
-  window.__fb={app,auth,db,authMod,fsMod};
-  return window.__fb;
-}
-function cloudSaveCfg(){
+async function smartImportURL(){
+  const url=(document.getElementById('im_url')?.value||'').trim();
+  if(!url){ alert('请先粘贴链接'); return; }
+  const lv=parseInt(document.getElementById('im_lv')?.value||String(CLV||2),10);
+  const mode=document.getElementById('im_mode')?.value||'auto';
+  const title=(document.getElementById('im_title')?.value||url).trim();
+  logImport('尝试抓取链接内容…（若提示跨域/CORS，请网页另存为HTML后上传）');
   try{
-    const cfgStr=document.getElementById('fbCfg')?.value.trim();
-    const email=document.getElementById('fbEmail')?.value.trim();
-    const pass=document.getElementById('fbPass')?.value;
-    if(cfgStr){ JSON.parse(cfgStr); } // validate
-    setCloudCfg({cfg:cfgStr||'',email:email||'',pass:pass||''});
-    alert('已保存云同步配置（注意：密码会保存在本设备浏览器中）。');
-  }catch(e){ alert('保存失败：'+(e?.message||e)); }
-}
-async function cloudConnect(){
-  try{
-    const cfg=getCloudCfg();
-    if(!cfg?.email||!cfg?.pass) throw new Error('请先填写云账号邮箱与密码');
-    const fb=await cloudInit();
-    const {signInWithEmailAndPassword,createUserWithEmailAndPassword}=fb.authMod;
-    try{
-      await signInWithEmailAndPassword(fb.auth,cfg.email,cfg.pass);
-    }catch(e){
-      // 若不存在则创建
-      await createUserWithEmailAndPassword(fb.auth,cfg.email,cfg.pass);
-    }
-    await cloudPull();
-    alert('云端连接成功，并已拉取数据。');
-  }catch(e){ alert('连接失败：'+(e?.message||e)); }
-}
-async function cloudPull(){
-  const cfg=getCloudCfg();
-  const fb=await cloudInit();
-  const {doc,getDoc}=fb.fsMod;
-  const u=fb.auth.currentUser;
-  if(!u) throw new Error('未登录云账号');
-  const ref=doc(fb.db,'catti_pro',u.uid);
-  const snap=await getDoc(ref);
-  if(snap.exists()){
-    const data=snap.data()?.data;
-    if(data && typeof data==='object'){
-      setUD(data);
-      sync('ok');
-      render();
-    }
+    const res=await fetch(url,{mode:'cors'});
+    const txt=await res.text();
+    await smartDetectAndImport({text:txt, title, url, lv, mode, source:'链接抓取'});
+  }catch(e){
+    logImport('链接抓取失败（多半是跨域/CORS或需要登录）。请：①网页另存为HTML后上传；或②复制正文粘贴到文本框导入。');
+    alert('链接抓取失败：浏览器跨域/需要登录。\n建议：网页另存为HTML后上传，或复制正文粘贴导入。');
   }
 }
-async function cloudPush(){
-  try{
-    const fb=await cloudInit();
-    const {doc,setDoc,serverTimestamp}=fb.fsMod;
-    const u=fb.auth.currentUser;
-    if(!u) throw new Error('请先点击“连接并拉取”登录云账号');
-    const ref=doc(fb.db,'catti_pro',u.uid);
-    await setDoc(ref,{data:getUD(),updatedAt:serverTimestamp?serverTimestamp():new Date().toISOString()},{merge:true});
-    alert('已推送到云端。');
-  }catch(e){ alert('推送失败：'+(e?.message||e)); }
+
+async function smartImportText(){
+  const txt=(document.getElementById('im_text')?.value||'').trim();
+  if(!txt){ alert('请先在文本框粘贴内容'); return; }
+  const lv=parseInt(document.getElementById('im_lv')?.value||String(CLV||2),10);
+  const mode=document.getElementById('im_mode')?.value||'auto';
+  const title=(document.getElementById('im_title')?.value||'粘贴导入').trim();
+  await smartDetectAndImport({text:txt, title, url:'', lv, mode, source:'粘贴文本'});
 }
-function cloudDisable(){ setCloudCfg(null); alert('已关闭云同步（本地数据不受影响）。'); render(); }
-async function cloudSyncNow(){
-  const cfg=getCloudCfg();
-  if(!cfg?.cfg){
-    alert('未启用云同步：你可以在「数据/同步」里配置 Firebase（免费额度），或继续使用导入/导出换设备。');
+
+async function smartDetectAndImport({text,title,url,lv,mode,source}){
+  ensureUDShape();
+  // 1) JSON
+  if(mode==='backup' || (mode==='auto' && text.trim().startsWith('{'))){
+    const obj=tryParseJSON(text);
+    if(obj){
+      // full backup?
+      const d=obj?.data;
+      if(mode==='backup' || (d && typeof d==='object' && ('r2' in d || 'vm' in d || 'qstat' in d))){
+        setUD(d);
+        sync('ok');
+        addMaterial({title, url, source: source+'（全量备份）', text: '[备份已导入]'});
+        logImport('✅ 导入成功：已覆盖当前账号数据（全量备份）。');
+        alert('导入成功：已覆盖当前账号数据（全量备份）。');
+        render();
+        return;
+      }
+      // words pack?
+      if(mode==='words' || Array.isArray(obj) || Array.isArray(obj?.words) || Array.isArray(obj?.vocab)){
+        const arr = Array.isArray(obj)?obj:(obj.words||obj.vocab||[]);
+        const words = arr.map(x=>({en:x.en||x.word||x.term||'', cn:x.cn||x.meaning||x.translation||'', tags:x.tags||x.tag||["二笔"], cat:x.cat||x.category||"自定义", mem:x.mem||x.note||""})).filter(x=>x.en&&x.cn);
+        const added = addMyWords(words);
+        addMaterial({title, url, source: source+'（词库JSON）', text: text.slice(0,20000)});
+        logImport(`✅ 词库导入完成：新增 ${added} 条。`);
+        alert(`词库导入完成：新增 ${added} 条。`);
+        render();
+        return;
+      }
+      // qbank pack?
+      if(mode==='bank' || Array.isArray(obj?.questions) || Array.isArray(obj?.qbank)){
+        const arr = obj.questions||obj.qbank||[];
+        const qs = arr.map(x=>({
+          t:x.t||x.qtype||'other',
+          q:x.q||x.question||'',
+          o:x.o||x.options||null,
+          a:x.a||x.answer||null,
+          analysis:x.analysis||null,
+          subj:x.subj||((x.t==='hanyi'||x.t==='yihan')?'实务':'综合能力'),
+          qtype:x.qtype||x.t||x.type||'other'
+        })).filter(x=>x.q);
+        const n=addMyQuestions(lv, qs);
+        addMaterial({title, url, source: source+'（题库JSON）', text: text.slice(0,20000)});
+        logImport(`✅ 题库导入完成：新增 ${n} 题（等级${lv}）。`);
+        alert(`题库导入完成：新增 ${n} 题（等级${lv}）。`);
+        render();
+        return;
+      }
+      // fallback: store as material
+      addMaterial({title, url, source: source+'（JSON资料）', text: text.slice(0,20000)});
+      logImport('已存档为资料（JSON），未识别为备份/词库/题库。');
+      alert('已存档为资料（JSON）。如果想当词库/题库，请在“导入策略”里强制选择。');
+      render();
+      return;
+    }
+  }
+
+  // 2) CSV-like words
+  if(mode==='words' || (mode==='auto' && looksLikeCSV(text))){
+    const words=parseCSVWords(text);
+    const added=addMyWords(words);
+    addMaterial({title, url, source: source+'（表格词库）', text: text.slice(0,20000)});
+    logImport(`✅ 词库导入完成：新增 ${added} 条。`);
+    alert(`词库导入完成：新增 ${added} 条。`);
+    render();
     return;
   }
-  // 尝试连接并推送
-  await cloudConnect();
-  await cloudPush();
+
+  // 3) text/html -> material + try parse to questions
+  const plain = stripHTML(text);
+  const qs = (mode==='material')?[]:parseTextToQuestions(plain);
+  const matId = addMaterial({title, url, source, text: plain.slice(0,50000)});
+  let qAdded=0;
+  if(mode==='bank' || (mode==='auto' && qs.length)){
+    qAdded = addMyQuestions(lv, qs);
+  }
+  // auto extract words candidates (optional)
+  let wAdded=0;
+  if(mode==='words'){
+    const w=extractWordsFromText(plain);
+    wAdded=addMyWords(w);
+  }
+  logImport(`✅ 已入库：资料#${matId}${qAdded?`；题库新增${qAdded}题`:''}${wAdded?`；词库新增${wAdded}条`:''}`);
+  alert(`导入完成：已存档资料${qAdded?`；新增题库${qAdded}题`:''}${wAdded?`；新增词库${wAdded}条`:''}`);
+  render();
 }
+
+function stripHTML(s){
+  if(!s) return '';
+  // if looks like html
+  if(/<html|<body|<div|<p|<br/i.test(s)){
+    const tmp=document.createElement('div');
+    tmp.innerHTML=s;
+    return tmp.innerText || tmp.textContent || '';
+  }
+  return s;
+}
+
+// 云同步已移除：保留函数避免旧按钮报错
+async function cloudSyncNow(){ alert('此版本已移除云同步（仅本地导入/导出）。'); }
+async function cloudConnect(){ throw new Error('此版本无云同步'); }
+async function cloudPull(){ throw new Error('此版本无云同步'); }
+async function cloudPush(){ throw new Error('此版本无云同步'); }
+function cloudDisable(){ return; }
+
 
 function exportData(){
   const d=getUD();
